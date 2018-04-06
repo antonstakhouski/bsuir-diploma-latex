@@ -48,11 +48,11 @@
 
 % Зачем: Настраивает межстрочный интервал, для размещения 40 +/- 3 строки текста на странице.
 % Почему: Пункт 2.1.1 Требований по оформлению пояснительной записки.
-\usepackage[nodisplayskipstretch]{setspace} 
+\usepackage[nodisplayskipstretch]{setspace}
 \setstretch{1.1}
 %\onehalfspacing
 
-% Зачем: Выбор шрифта по-умолчанию. 
+% Зачем: Выбор шрифта по-умолчанию.
 % Почему: Пункт 2.1.1 Требований по оформлению пояснительной записки.
 % Примечание: В требованиях не указан, какой именно шрифт использовать. По традиции используем TNR.
 \renewcommand{\rmdefault}{ftm} % Times New Roman
@@ -71,7 +71,7 @@
 
 % Зачем: Добавляет скобку 1) к номеру сноски
 % Почему: Пункты 2.9.2 и 2.9.1 Требований по оформлению пояснительной записки.
-\makeatletter 
+\makeatletter
 \def\@makefnmark{\hbox{\@textsuperscript{\normalfont\@thefnmark)}}}
 \makeatother
 
@@ -118,7 +118,7 @@
 \fancyfoot[R]{\thepage} % установка верхнего колонтитула
 \renewcommand{\footrulewidth}{0pt} % убрать разделительную линию внизу страницы
 \renewcommand{\headrulewidth}{0pt} % убрать разделительную линию вверху страницы
-\fancypagestyle{plain}{ 
+\fancypagestyle{plain}{
     \fancyhf{}
     \rfoot{\thepage}}
 
@@ -240,13 +240,13 @@
     {
     %%% Следующие строки определяют специфические требования разных редакций стандартов. Раскоменнтируйте нужные 2 строки
     %% стандартный абзац, СТП-01 2010
-    %\par 
+    %\par
     %\tabularx{\textwidth-\fivecharsapprox}{@{}ll@{ --- } X }
     %% без отступа, СТП-01 2013
-    \noindent 
+    \noindent
     \tabularx{\textwidth}{@{}ll@{ --- } X }
     }
-    { 
+    {
     \\[\parsep]
     \endtabularx
     }
@@ -256,7 +256,7 @@
 \usepackage{amsmath}
 
 
-% Зачем: Поддержка ажурного и готического шрифтов 
+% Зачем: Поддержка ажурного и готического шрифтов
 \usepackage{amsfonts}
 
 
@@ -410,7 +410,7 @@
 \newcounter{totreferences}
 \newcounter{totequation}
 
-\providecommand\totfig{} 
+\providecommand\totfig{}
 \providecommand\tottab{}
 \providecommand\totref{}
 \providecommand\toteq{}
@@ -472,3 +472,7 @@
    \fi
 }
 
+% Нумерованный список с арабскими цифрами на всех уровнях нумерации
+\usepackage{enumitem}
+\newlist{legal}{enumerate}{10}
+\setlist[legal]{label*=\arabic*.}
