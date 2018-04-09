@@ -1,0 +1,25 @@
+!_TAG_FILE_FORMAT	2	/extended format; --format=1 will not append ;" to lines/
+!_TAG_FILE_SORTED	1	/0=unsorted, 1=sorted, 2=foldcase/
+!_TAG_PROGRAM_AUTHOR	Darren Hiebert	/dhiebert@users.sourceforge.net/
+!_TAG_PROGRAM_NAME	Exuberant Ctags	//
+!_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
+!_TAG_PROGRAM_VERSION	5.8	//
+Asia ALARM	sec_arch_and_mod.tex	/^Данная возможность была использована при реализации алгоритмов вывода структуры вероятностной сети по данным.$/;"	b
+BIBTEX	Makefile	/^BIBTEX = bibtex$/;"	m
+COURSE_REPORT_PDF	Makefile	/^COURSE_REPORT_PDF = course_report$/;"	m
+DIPLOMA_REPORT_PDF	Makefile	/^DIPLOMA_REPORT_PDF = diploma_report$/;"	m
+DROPBOX_PUBLIC	Makefile	/^	DROPBOX_PUBLIC=$(HOME)\/Dropbox\/Public$/;"	m
+DROPBOX_PUBLIC	Makefile	/^	DROPBOX_PUBLIC=$(USERPROFILE)\/Dropbox\/Public$/;"	m
+GREP	Makefile	/^GREP = grep$/;"	m
+Netica	sec_domain.tex	/^Но функциональность, обеспечивающая автоматический вывод структуры сети по данным, отсутствует.$/;"	b
+PDFLATEX	Makefile	/^PDFLATEX = pdflatex$/;"	m
+PRACTICE_REPORT_PDF	Makefile	/^PRACTICE_REPORT_PDF = practice_report$/;"	m
+RM	Makefile	/^RM = rm -f$/;"	m
+SHELL	Makefile	/^	SHELL=%WINDIR%\/cmd.exe$/;"	m
+SHELL	Makefile	/^	SHELL=\/usr\/bin\/env sh$/;"	m
+TASK_PDF	Makefile	/^TASK_PDF = diploma_task_only$/;"	m
+TITLE_PDF	Makefile	/^TITLE_PDF = diploma_title_only$/;"	m
+clearpage startsection section	preamble.tex	/^\\renewcommand\\section{%$/;"	s
+fsharp	sec_tech.tex	/^Ключевым словом \\lstinline[style=csharpinlinestyle]!async! помечаются методы и лямбда"=выражения, которые внутри содержат ожидание выполнения асинхронных операций с помощью оператора \\lstinline[style=csharpinlinestyle]!await!, который отвечает за преобразования кода метода во время компиляции.$/;"	b
+startsection subsection	preamble.tex	/^\\renewcommand\\subsection{%$/;"	b
+startsection subsubsection	preamble.tex	/^\\renewcommand\\subsubsection{$/;"	b
