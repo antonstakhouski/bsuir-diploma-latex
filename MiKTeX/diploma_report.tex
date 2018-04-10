@@ -6,6 +6,8 @@
 
 \input{diploma_title} % page 1
 
+\pagenumbering{gobble}
+
 % \input{abstract} % page 2
 %
 \input{diploma_task} % pages 3 and 4. printed separately
@@ -16,9 +18,10 @@
 
 %\input{review} % not part of report
 
-\setcounter{page}{5}
-
 \input{table_of_contents}
+
+\pagenumbering{arabic}
+\setcounter{page}{3}
 
 \input{diploma_content}
 
