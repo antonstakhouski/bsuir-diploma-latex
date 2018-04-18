@@ -95,7 +95,7 @@
 % Зачем: Настраивает отступ между таблицей с содержанимем и словом СОДЕРЖАНИЕ
 % Почему: Пункт 2.2.7 Требований по оформлению пояснительной записки.
 \usepackage{tocloft}
-\setlength{\cftbeforetoctitleskip}{-1em}
+\setlength{\cftbeforetoctitleskip}{-3em}
 \setlength{\cftaftertoctitleskip}{1em}
 
 
@@ -131,7 +131,7 @@
     {\fivecharsapprox}%
     {-1em \@plus -1ex \@minus -.2ex}%
     {1em \@plus .2ex}%
-    {\raggedright\hyphenpenalty=10000\normalfont\large\bfseries\MakeUppercase}}
+    {\raggedright\hyphenpenalty=10000\normalfont\normalsize\MakeUppercase}}
 \makeatother
 
 
@@ -143,7 +143,7 @@
     {\fivecharsapprox}%
     {-1em \@plus -1ex \@minus -.2ex}%
     {1em \@plus .2ex}%
-    {\raggedright\hyphenpenalty=10000\normalfont\normalsize\bfseries}}
+    {\raggedright\hyphenpenalty=10000\normalfont\normalsize}}
 \makeatother
 
 
@@ -155,7 +155,7 @@
     {\fivecharsapprox}%
     {-1em \@plus -1ex \@minus -.2ex}%
     {\z@}%
-    {\raggedright\hyphenpenalty=10000\normalfont\normalsize\bfseries}}
+    {\raggedright\hyphenpenalty=10000\normalfont\normalsize}}
 \makeatother
 
 % Зачем: для оформления введения и заключения, они должны быть выровнены по центру.
@@ -166,7 +166,7 @@
     {\z@}%
     {-1em \@plus -1ex \@minus -.2ex}%
     {1em \@plus .2ex}%
-    {\centering\hyphenpenalty=10000\normalfont\large\bfseries\MakeUppercase}%
+    {\centering\hyphenpenalty=10000\normalfont\normalsize\MakeUppercase}%
     }
 \makeatother
 
@@ -475,6 +475,3 @@
 % Нумерованный список с арабскими цифрами на всех уровнях нумерации
 \newlist{legal}{enumerate}{10}
 \setlist[legal]{font=\bfseries}
-
-% Генерация текста-заполнителя
-\usepackage{blindtext}
