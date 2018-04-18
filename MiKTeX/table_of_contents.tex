@@ -2,6 +2,22 @@
 % Почему: Пункт 2.2.7 Требований по оформлению пояснительной записки.
 \renewcommand \contentsname {\centerline{\normalfont\normalsize{СОДЕРЖАНИЕ}}}
 
+\makeatletter
+\let\oldcontentsline\contentsline
+\def\contentsline#1#2{%
+  \expandafter\ifx\csname l@#1\endcsname\l@section
+    \expandafter\@firstoftwo
+  \else
+    \expandafter\@secondoftwo
+  \fi
+  {%
+    \oldcontentsline{#1}{\MakeTextUppercase{#2}}%
+  }{%
+    \oldcontentsline{#1}{#2}%
+  }%
+}
+\makeatother
+
 % Зачем: Не захламлять основной файл
 % Примечание: \small\selectfont злостный хак, чтобы уменьшить размер шрифта в ToC
 {
