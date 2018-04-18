@@ -134,7 +134,6 @@
     {\raggedright\hyphenpenalty=10000\normalfont\normalsize\MakeUppercase}}
 \makeatother
 
-
 % Зачем: Задает стиль заголовков подразделов
 % Почему: Пункты 2.1.1, 2.2.5 и ПРИЛОЖЕНИЕ Л Требований по оформлению пояснительной записки.
 \makeatletter
@@ -166,6 +165,17 @@
     {\z@}%
     {-1em \@plus -1ex \@minus -.2ex}%
     {1em \@plus .2ex}%
+    {\centering\hyphenpenalty=10000\normalfont\normalsize\MakeUppercase}%
+    }
+\makeatother
+
+% Приложения к записке
+\makeatletter
+\newcommand\sectionadd{%
+  \clearpage\@startsection {section}{1}%
+    {\z@}%
+    {-1em \@plus -1ex \@minus -.2ex}%
+    {1sp \@plus .1em}%
     {\centering\hyphenpenalty=10000\normalfont\normalsize\MakeUppercase}%
     }
 \makeatother
@@ -475,3 +485,15 @@
 % Нумерованный список с арабскими цифрами на всех уровнях нумерации
 \newlist{legal}{enumerate}{10}
 \setlist[legal]{font=\bfseries}
+
+%\usepackage{titlesec}
+%\titlespacing{\chapter}{0pt}{0pt}{4pt}
+
+%\titleformat{\section}
+    %{\normalfont\normalsize}
+    %{\thesection}{1em}{\MakeUppercase}
+
+%\titleformat{\subsection}
+    %{\normalfont\normalsize}
+    %{\thesubsection}{1em}{}
+
