@@ -6,14 +6,27 @@
 
 \input{practice_title}
 
-%\input{sec_intro}
+\input{diploma_title} % page 1
 
-%\setcounter{page}{2}
+\pagenumbering{gobble}
 
-%\input{table_of_contents}
+% \input{abstract} % page 2
+%
+\input{diploma_task} % pages 3 and 4. printed separately
 
- %\input{practice_content}
+% \input{annotation} % not part of report
 
-%\input{references}
+%\input{feedback} % not part of report
+
+%\input{review} % not part of report
+
+\input{table_of_contents}
+
+\pagenumbering{arabic}
+\setcounter{page}{4}
+
+\input{diploma_content}
+
+\input{references}
 
 \end{document}

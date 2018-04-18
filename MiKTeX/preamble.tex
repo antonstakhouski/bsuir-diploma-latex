@@ -6,11 +6,11 @@
 % Зачем: Настройка Times New Roman.
 % Рекомендовано для Windows (нужен PSCyr, подробности см. в fonts_windows.tex)
 % раскомментировать, чтобы использовать:
-%\input{fonts_windows}% не забудьте закомментировать \input{fonts_linux}
+\input{fonts_windows}% не забудьте закомментировать \input{fonts_linux}
 
 % Рекомендовано для Linux (нужен scalable-cyrfonts-tex, подробности см. в fonts_linux.tex)
 % раскомментировать, чтобы использовать:
-\input{fonts_linux}% не забудьте закомментировать \input{fonts_windows}
+%\input{fonts_linux}% не забудьте закомментировать \input{fonts_windows}
 
 % Зачем: Установка кодировки исходных файлов.
 \usepackage[utf8]{inputenc}
@@ -49,7 +49,7 @@
 % Зачем: Настраивает межстрочный интервал, для размещения 40 +/- 3 строки текста на странице.
 % Почему: Пункт 2.1.1 Требований по оформлению пояснительной записки.
 \usepackage[nodisplayskipstretch]{setspace}
-\setstretch{1.1}
+\setstretch{1.0}
 %\onehalfspacing
 
 % Зачем: Выбор шрифта по-умолчанию.
@@ -240,11 +240,11 @@
     {
     %%% Следующие строки определяют специфические требования разных редакций стандартов. Раскоменнтируйте нужные 2 строки
     %% стандартный абзац, СТП-01 2010
-    %\par
-    %\tabularx{\textwidth-\fivecharsapprox}{@{}ll@{ --- } X }
+    \par
+    \tabularx{\textwidth-\fivecharsapprox}{@{}ll@{ --- } X }
     %% без отступа, СТП-01 2013
-    \noindent
-    \tabularx{\textwidth}{@{}ll@{ --- } X }
+    %\noindent
+    %\tabularx{\textwidth}{@{}ll@{ --- } X }
     }
     {
     \\[\parsep]
@@ -473,9 +473,8 @@
 }
 
 % Нумерованный список с арабскими цифрами на всех уровнях нумерации
-\usepackage{enumitem}
 \newlist{legal}{enumerate}{10}
-\setlist[legal]{label*=\arabic*.}
+\setlist[legal]{font=\bfseries}
 
 % Генерация текста-заполнителя
 \usepackage{blindtext}
