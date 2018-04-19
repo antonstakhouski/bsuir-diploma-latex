@@ -184,7 +184,7 @@
 
 % Зачем: Задает стиль библиографии
 % Почему: Пункт 2.8.6 Требований по оформлению пояснительной записки.
-\bibliographystyle{styles/belarus-specific-utf8gost780u}
+\bibliographystyle{styles/ugost2003}
 
 
 % Зачем: Пакет для вставки картинок
@@ -401,9 +401,9 @@
 
 \usepackage[normalem]{ulem}
 
-\usepackage[final,hidelinks]{hyperref}
+\usepackage[final,hidelinks,unicode]{hyperref}
 % Моноширинный шрифт выглядит визуально больше, чем пропорциональный шрифт, если их размеры одинаковы. Искусственно уменьшаем размер ссылок.
-\renewcommand{\UrlFont}{\small\rmfamily\tt}
+\renewcommand{\UrlFont}{\normalfont\normalsize}
 
 \usepackage[square,numbers,sort&compress]{natbib}
 \setlength{\bibsep}{0em}
