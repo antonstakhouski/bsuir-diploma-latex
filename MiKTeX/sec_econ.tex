@@ -1,8 +1,50 @@
-\newcommand{\byr}{Br}
+\newcommand{\byr}{руб}
 
-\section{Технико-экономическое обоснование}
+\section{Технико-экономическое обоснование разработки системы функционального контроля технических средств КМУ
+артиллерийского дивизиона}
 
 % Begin Calculations
+\FPeval{\bonusRate}{1.75}
+
+\FPeval{\leadDevHours}{50}
+\FPeval{\devHours}{200}
+\FPeval{\qaHours}{100}
+
+\FPeval{\leadDevPerMonth}{2995.5}
+\FPeval{\devPerMonth}{998.5}
+\FPeval{\qaPerMonth}{998.5}
+
+\FPeval{\normativeManHours}{168}
+
+\FPeval{\leadDevPerHourExact}{\leadDevPerMonth / \normativeManHours}
+\FPeval{\devPerHourExact}{\devPerMonth / \normativeManHours}
+\FPeval{\qaPerHourExact}{\qaPerMonth / \normativeManHours}
+
+\FPround{\leadDevPerHour}{\leadDevPerHourExact}{3}
+\FPround{\devPerHour}{\devPerHourExact}{3}
+\FPround{\qaPerHour}{\qaPerHourExact}{3}
+
+\FPeval{\leadDevSalaryExact}{\leadDevHours * \leadDevPerHourExact}
+\FPeval{\devSalaryExact}{\devHours * \devPerHourExact}
+\FPeval{\qaSalaryExact}{\qaHours * \qaPerHourExact}
+
+\FPround{\leadDevSalary}{\leadDevSalaryExact}{1}
+\FPround{\devSalary}{\devSalaryExact}{1}
+\FPround{\qaSalary}{\qaSalaryExact}{1}
+
+\FPeval{\totalSalaryExact}{clip(\leadDevSalaryExact + \devSalaryExact + \qaSalaryExact) * \bonusRate}
+
+\FPround{\totalSalary}{\totalSalaryExact}{1}
+
+\FPeval{\normExtraSalary}{15}
+
+\FPeval{\extraSalaryExact}{\totalSalaryExact * \normExtraSalary / 100}
+\FPround{\extraSalary}{\extraSalaryExact}{1}
+
+\FPeval{\socialFeesCoeff}{34.6}
+\FPeval{\socialFeesExact}{clip(\totalSalaryExact + \extraSalaryExact) * \socialFeesCoeff / 100}
+\FPround{\socialFees}{\socialFeesExact}{1}
+
 
 \FPeval{\totalProgramSize}{15680}
 \FPeval{\totalProgramSizeCorrected}{8650}
@@ -49,10 +91,9 @@
 \FPround{\salaryPerHourFst}{\salaryPerHourFstExact}{0}
 \FPround{\salaryPerHourSnd}{\salaryPerHourSndExact}{0}
 
-\FPeval{\bonusRate}{1.5}
 \FPeval{\workingHoursInDay}{8}
 \FPeval{\totalSalaryExact}{clip( \workingHoursInDay * \bonusRate * ( \salaryPerHourFst * \employmentFst + \salaryPerHourSnd * \employmentSnd ) )}
-\FPround{\totalSalary}{\totalSalaryExact}{0}
+%\FPround{\totalSalary}{\totalSalaryExact}{0}
 
 \FPeval{\additionalSalaryNormative}{20}
 
@@ -129,116 +170,165 @@
 
 % End Calculations
 
-Целью дипломного проекта является разработка и анализ алгоритмов построения вероятностных сетей.
-Вероятностные сети используются в ПО для принятия решения в условиях недостаточной определенности.
-Данный способ статистического моделирования показал свою пригодность в реальных условиях в сложных предметных областях: медицине, космической промышленности, финансовой сфере и других областях.
-Для достижения указанной цели планируется разработать ПО для представления и синтеза вероятностных сетей. 
-Сеть синтезируется по набору данных и позволяет производить оценку параметров распределения случайных величин, характеризующих неизвестные данные. 
 
-\subsection{Расчёт затрат, необходимых для создания ПО}
+\subsection{Описание функций, назначения и потенциальных пользователей ПО}
 
-Целесообразность создания коммерческого ПО требует проведения предварительной экономической оценки и расчета экономического эффекта.
-Экономический эффект у разработчика ПО зависит от объёма инвестиций в разработку проекта, цены на готовый программный продукт и количества проданный копий, и проявляется в виде роста чистой прибыли.   
+Система функционального контроля технических средств КМУ артиллерийского дивизиона предназначена для использования в
+армейских подразделениях. Данная система используется как часть комплескса автоматизации АРМ артиллерийского дивизиона.
+Система предназначена для обнаружения, настройки и тестирования ТС артиллерийского дивизиона.
 
-Оценка стоимости создания ПО со стороны разработчика предполагает составление сметы затрат, которая включает следующие статьи расходов:
+Разработанная система обладает следующим функционалом:
 \begin{itemize}
-
-  \item заработную плату исполнителей, основную ($ \text{З}_{\text{o}} $) и дополнительную ($\text{З}_{\text{д}} $);
-
-  \item отчисления в фонд социальной защиты населения ($ \text{З}_\text{сз} $);
-
-  \item налоги от фонда оплаты труда ($ \text{Н}_\text{е} $);
-
-  \item материалы и комплектующие ($ \text{М} $);
-
-  \item спецоборудование ($ \text{Р}_\text{с} $);
-
-  \item машинное время ($ \text{Р}_\text{м} $);
-
-  \item расходны на научные командировки ($ \text{Р}_\text{нк} $);
-
-  \item прочие прямые расходы ($ \text{П}_\text{з} $);
-
-  \item накладные расходы ($ \text{Р}_\text{н} $);
-
-  \item расходы на сопровождение и адаптацию ($ \text{Р}_\text{са} $).
-
+		\item обнаружение и настройка подключенных к АРМ технических средств
+		\item тестирование и настройка метеокомплекта
+		\item тестирование и настройка навигационной системы
+		\item тестирование радиоканалов
+		\item тестирование специального принтера
+		\item тестирование и настройка ЛВС
 \end{itemize}
-Исходные данные для разрабатываемого проекта указаны в таблице~\ref{table:econ:initial_data}.
+
+Данный продукт разрабатывается под заказ для вооруженных сил.
+
+\subsection{Расчёт на разработку ПО}
+
+Расчет затрат на разработку ПО расчитывается упрощенно, на основе следующих статей:
+\begin{itemize}
+	\item затраты на основную заработную плату разработчиков;
+	\item затраты на дополнительную заработную плату разработчиков;
+	\item отчисления на социальные нужды;
+	\item прочие отчисления (амортизационные отчисления, арендная плата за помещения и
+		оборудование, расходы на управление и реализацию, расходы на электроэнергию и тому подобное).
+\end{itemize}
+
+Произведем расчет данных статей.
+
+\subsubsection{Затраты на основную заработную плату разработчиков}
+
+Затраты на основную заработную плату команды разработчиков определяются исходя из численности и состава команды,
+размеров месячной заработной платы каждого из участника команды, а также общей трудоемкости разработки программного
+обеспечения.
+
+Основная заработная плата исполнителей проекта определяется по формуле ~\ref{eq:econ:main_salary}
+
+\begin{equation}
+  \label{eq:econ:main_salary}
+	\text{З}_\text{о} = \text{К}_\text{пр} \cdot \sum_{i = 1}^{n} \text{З}_\text{чi} \cdot t_{i} \text{\,,}
+\end{equation}
+
+\begin{explanation}
+	где & $ \text{K}_\text{пр} $ & коэффициент премий; \\
+	& $ \text{З}_\text{чi} $ & часовая заработанная плата i-го исполнителя, руб; \\
+	& $ t_{i} $ & трудоемкость работ, выполняемых i-м исполнителем, ч; \\
+	& $ n $ & количество исполнителей, занятых разработкой конкретного ПО.
+\end{explanation}
+
+Часовая заработная плата определяется путем деления месячной заработной платы на количество рабочих часов в месяце и
+рассчитывается по формуле ~\ref{eq:econ:hour_salary}.
+
+\begin{equation}
+  \label{eq:econ:hour_salary}
+	\text{З}_\text{чi} = \text{З}_\text{мi} \cdot \text{Ф}_\text{рв} \text{\,,}
+\end{equation}
+
+\begin{explanation}
+	где & $ \text{З}_\text{мi} $ & месячная заработная плата i-го участника команды, руб; \\
+	& $ \text{Ф}_\text{рв} $ & устнановленный фонд рабочего времени, \num{\normativeManHours} ч.
+\end{explanation}
+
+Средняя заработная плата по Республике Беларусь берется из открытого источника ~\cite{salaries}.
+
+Расчет затрат на основную заработную плату команды разработчиков приведен в таблице ~\ref{table:econ:salaryCalc}.
 
 \begin{table}[!ht]
-\caption{Исходные данные}
-\label{table:econ:initial_data}
-  \centering
-  \begin{tabular}{| >{\raggedright}m{0.62\textwidth} 
-                  | >{\centering}m{0.17\textwidth} 
-                  | >{\centering\arraybackslash}m{0.13\textwidth}|}
-    \hline
-    {\begin{center}
-      Наименование
-    \end{center} } & Условное обозначение & Значение \\
-    \hline
-    Категория сложности & & 2 \\
+\small
+\caption{Расчет затрат на основную заработную плату команды разработчиков}
+	\label{table:econ:salaryCalc}
+	\centering
+	\begin{tabular}{| >{\centering}m{0.14\textwidth}
+		| >{\centering}m{0.17\textwidth}
+		  | >{\centering}m{0.13\textwidth}
+		  | >{\centering}m{0.12\textwidth}
+		  | >{\centering}m{0.15\textwidth}
+		  | >{\centering\arraybackslash}m{0.13\textwidth}|}
 
-    \hline
-    Коэффициент сложности, ед. & $ \text{К}_\text{с} $ & \num{\complexityFactor} \\
+		\hline
+		Участники команды & Вид выполняемой работы & Месячная заработная плата, р. & Часовая заработная плата, р. &
+		Трудоемкость работ, ч. & Зарплата по тарифу, р. \\
 
-    \hline
-    Степень использования при разработке стандартных модулей, ед. & $ \text{К}_\text{т} $ & \num{\stdModuleUsageFactor} \\
+		\hline
+		Ведущий инженер-программист & Разработка архитектуры & \num{\leadDevPerMonth} & \num{\leadDevPerHour} &
+		\num{\leadDevHours} & \num{\leadDevSalary} \\
 
-    \hline
-    Коэффициент новизны, ед. & $ \text{К}_\text{н} $ & \num{\originalityFactor} \\
+		\hline
+		Инженер-программист & Реализация программного продукта & \num{\devPerMonth} & \num{\devPerHour} &
+		\num{\devHours} & \num{\devSalary} \\
 
-    \hline
-    Годовой эффективный фонд времени, дн. & $ \text{Ф}_\text{эф} $ & \num{\workingDaysInYear} \\
+		\hline
+		Тестировщик & Тестирование программного продукта & \num{\qaPerMonth} & \num{\qaPerHour} & \num{\qaHours}
+		& \num{\qaSalary} \\
 
-    \hline
-    Продолжительность рабочего дня, ч. & $ \text{Т}_\text{ч} $ & \num{\workingHoursInDay} \\
+		\hline
+		\multicolumn{5}{|l|}{Премия} & \num{\bonusRate} \\
 
-    \hline
-    Месячная тарифная ставка первого разряда, \byr{} & $ \text{Т}_{\text{м}_{1}}$ & \num{\tariffRateFirst} \\
-
-    \hline
-    Коэффициент премирования, ед. & $ \text{К} $ & \num{\bonusRate} \\
-
-    \hline
-    Норматив дополнительной заработной платы, ед. & $ \text{Н}_\text{д} $ & \num{\additionalSalaryNormative} \\
-
-    \hline
-    Норматив отчислений в ФСЗН и обязательное страхование, $\%$ & $ \text{Н}_\text{сз} $ & \num{\socialProtectionFund} \\
-
-    \hline
-    Норматив командировочных расходов, $\%$ & $ \text{Н}_\text{к} $ & \num{\businessTripNormative} \\
-
-    \hline
-    Норматив прочих затрат, $\%$ & $ \text{Н}_\text{пз} $ & \num{\otherCostNormative} \\
-
-    \hline
-    Норматив накладных расходов, $\%$ & $ \text{Н}_\text{рн} $ & \num{\overheadCostNormative} \\
-
-    \hline
-    Прогнозируемый уровень рентабельности, $\%$ & $ \text{У}_\text{рп} $ & \num{\profitability} \\
-
-    \hline
-    Норматив НДС, $\%$ & $ \text{Н}_\text{дс} $ & \num{\ndsNormative} \\
-
-    \hline
-    Норматив налога на прибыль, $\%$ & $ \text{Н}_\text{п} $ & \num{\taxForIncome} \\
-
-    \hline
-    Норматив расхода материалов, $\%$ & $ \text{Н}_\text{мз} $ & \num{\stuffNormative} \\
-
-    \hline
-    Норматив расхода машинного времени, ч. & $ \text{Н}_\text{мв} $ & \num{\adjustedTimeToDebugCodeNormative} \\
-
-    \hline
-    Цена одного часа машинного времени, \byr{} & $ \text{Н}_\text{мв} $ & \num{\oneHourMachineTimeCost} \\
-
-    \hline
-    Норматив расходов на сопровождение и адаптацию ПО, $\%$ & $ \text{Н}_\text{рса} $ & \num{\supportNormative} \\
-    \hline
-  \end{tabular}
+		\hline
+		\multicolumn{5}{|l|}{Итого затраты на основную заработную плату разработчиков} & \num{\totalSalary} \\
+		\hline
+	\end{tabular}
 \end{table}
+
+\subsubsection{Затраты на дополнительную заработную плату разработчиков}
+
+Данные затраты включают в себя выплаты, предусмотренные законодательством о труде:
+\begin{itemize}
+	\item оплата льготных часов;
+	\item оплата времени выполнения государственных обязанностей;
+	\item оплаты трудовых отпусков;
+	\item выплаты, не связанные с основной деятельностью исполнителей.
+\end{itemize}
+
+Затраты на дополнительную заработную плату разработчиков определяются по следующей формуле
+
+\begin{equation}
+  \label{eq:econ:extra_salary}
+	\text{З}_\text{д} = \text{З}_\text{о} \cdot \text{Н}_\text{д} \text{\,,}
+\end{equation}
+
+\begin{explanation}
+	где & $ \text{З}_\text{о} $ & затраты на основную заработную плату, руб; \\
+	& $ \text{Н}_\text{д} $ & норматив дополнительной заработной платы, \num{\normExtraSalary} \%.
+\end{explanation}
+
+Зарплаты на дополнительную заработную плату:
+
+\begin{equation}
+  \label{eq:econ:extra_salary_calc}
+	\text{З}_\text{д} = \frac{\num{\totalSalary} \cdot \num{\normExtraSalary}}{100} = \num{\extraSalary} {\text{ \byr}} \text{.}
+\end{equation}
+
+\subsubsection{Отчисления на социальные нужды}
+
+Отчисления на социальные нужды идут в фонд социальной защиты населения и на обязательное страхование. Эти отчисления определяются в соответствии с действующими законодательными актами по формуле
+
+\begin{equation}
+  \label{eq:econ:social_fees}
+	\text{Р}_\text{соц} = \frac{(\text{З}_\text{о} + \text{З}_\text{д}) \cdot \text{Н}_\text{соц}} {100} \text{\,,}
+\end{equation}
+
+\begin{explanation}
+	где & $ \text{Н}_\text{соц} $ & норматив отчислений на социальные нужды, \num{\socialFeesCoeff} \%.
+\end{explanation}
+
+Отчисления на социальные нужды:
+
+\begin{equation}
+  \label{eq:econ:social_fees_calc}
+	\text{З}_\text{о} = \frac{(\num{\totalSalary} + \num{\extraSalary}) \cdot \num{\socialFeesCoeff}}{100} =
+	\num{\socialFees} {\text{ \byr}} \text{.}
+\end{equation}
+
+%Рсоц= (4680,2+ 702,0)∙34,6100=1862,2 руб.
+
+
 
 На основании сметы затрат и анализа рынка ПО определяется плановая отпускаемая цена.
 Для составления сметы затрат на создание ПО необходима предварительная оценка трудоемкости ПО и его объёма.
@@ -263,23 +353,23 @@
 \caption{Перечень и объём функций программного модуля}
 \label{table:econ:function_sizes}
 \centering
-  \begin{tabular}{| >{\centering}m{0.12\textwidth} 
-                  | >{\raggedright}m{0.40\textwidth} 
-                  | >{\centering}m{0.18\textwidth} 
+  \begin{tabular}{| >{\centering}m{0.12\textwidth}
+                  | >{\raggedright}m{0.40\textwidth}
+                  | >{\centering}m{0.18\textwidth}
                   | >{\centering\arraybackslash}m{0.18\textwidth}|}
 
   \hline
          \multirow{2}{0.12\textwidth}[-0.5em]{\centering \No{} функции}
-       & \multirow{2}{0.40\textwidth}[-0.55em]{\centering Наименование (содержание)} 
+       & \multirow{2}{0.40\textwidth}[-0.55em]{\centering Наименование (содержание)}
        & \multicolumn{2}{c|}{\centering Объём функции, LoC} \tabularnewline
-  
-  \cline{3-4} & 
+
+  \cline{3-4} &
        & { по каталогу ($ V_{i} $) }
        & { уточненный ($ V_{i}^{\text{у}} $) } \tabularnewline
-  
-  \hline 
+
+  \hline
   101 & Организация ввода информации & \num{100} & \num{60} \tabularnewline
-  
+
   \hline
   102 & Контроль, предварительная обработка и ввод информации & \num{520} & \num{520} \tabularnewline
 
@@ -302,7 +392,7 @@
   507 & Обеспечение интерфейса между компонентами & \num{730} & \num{730} \tabularnewline
 
   \hline
-  605 & Вспомогательные и сервисные программы & \num{460} & \num{280} \tabularnewline 
+  605 & Вспомогательные и сервисные программы & \num{460} & \num{280} \tabularnewline
 
   \hline
   701 & Математическая статистика и прогнозирование & \num{8370} & \num{3500} \tabularnewline
@@ -343,8 +433,8 @@
 По приведенным данным уточненный объём некоторых функций изменился, и общий объём ПО составил $ V_{o} = \SI{\totalProgramSize}{\text{LoC}} $, общий уточненный общем ПО~---~$ V_{\text{у}} = \SI{\totalProgramSizeCorrected}{\text{LoC}} $.
 
 По уточненному объёму ПО и нормативам затрат труда в расчете на единицу объёма определяются нормативная и общая трудоемкость разработки ПО.
-Уточненный объём ПО~---~\SI{\totalProgramSizeCorrected}{\text{LoC}}. 
-ПО относится ко второй категории сложности: предполагается его использование для сложных статистических расчетов и решения задач классификации, также необходимо обеспечить переносимость ПО~\cite[с.\,66, приложение~4, таблица~П.4.1]{palicyn_2006}. 
+Уточненный объём ПО~---~\SI{\totalProgramSizeCorrected}{\text{LoC}}.
+ПО относится ко второй категории сложности: предполагается его использование для сложных статистических расчетов и решения задач классификации, также необходимо обеспечить переносимость ПО~\cite[с.\,66, приложение~4, таблица~П.4.1]{palicyn_2006}.
 По полученным данным определяется нормативная трудоемкость разработки ПО.
 Согласно укрупненным нормам времени на разработку ПО в зависимости от уточненного объёма ПО и группы сложности ПО~\cite[c.~64,~приложение~3]{palicyn_2006} нормативная трудоемкость разрабатываемого проекта составляет~$ \text{Т}_\text{н} = \SI{\normativeManDays}{\text{чел.} / \text{дн.}}  $
 
@@ -352,9 +442,9 @@
 Используем формулу (\ref{eq:econ:effort_common}) для оценки общей трудоемкости для небольших проектов:
 \begin{equation}
   \label{eq:econ:effort_common}
-  \text{Т}_\text{о} = \text{Т}_\text{н} \cdot 
-                      \text{К}_\text{с} \cdot 
-                      \text{К}_\text{т} \cdot 
+  \text{Т}_\text{о} = \text{Т}_\text{н} \cdot
+                      \text{К}_\text{с} \cdot
+                      \text{К}_\text{т} \cdot
                       \text{К}_\text{н} \text{\,,}
 \end{equation}
 \begin{explanation}
@@ -406,7 +496,7 @@
 Эффективный фонд времени работы одного разработчика вычисляется по формуле
 \begin{equation}
   \label{eq:econ:effective_time_per_programmer}
-  \text{Ф}_\text{эф} = 
+  \text{Ф}_\text{эф} =
     \text{Д}_\text{г} -
     \text{Д}_\text{п} -
     \text{Д}_\text{в} -
@@ -427,9 +517,9 @@
 Учитывая срок разработки проекта $ \text{Т}_\text{р} = \SI{\developmentTimeMonths}{\text{мес.}} = \SI{\developmentTimeYears}{\text{года}} $, общую трудоемкость и фонд эффективного времени одного работника, вычисленные ранее, можем рассчитать численность исполнителей проекта
 \begin{equation}
   \label{eq:econ:num_of_programmers_calc}
-  \text{Ч}_\text{р} = 
+  \text{Ч}_\text{р} =
     \frac{\num{\adjustedManDays}}
-         {\num{\developmentTimeYears} \times \num{\workingDaysInYear}} 
+         {\num{\developmentTimeYears} \times \num{\workingDaysInYear}}
     \approx \SI{\requiredNumberOfProgrammers}{\text{рабочих}}.
 \end{equation}
 
@@ -438,9 +528,9 @@
 \begin{table}[ht]
   \caption{Работники, занятые в проекте}
   \label{table:econ:programmers}
-  \begin{tabular}{| >{\centering}m{0.4\textwidth} 
-                  | >{\centering}m{0.15\textwidth} 
-                  | >{\centering}m{0.18\textwidth} 
+  \begin{tabular}{| >{\centering}m{0.4\textwidth}
+                  | >{\centering}m{0.15\textwidth}
+                  | >{\centering}m{0.18\textwidth}
                   | >{\centering\arraybackslash}m{0.15\textwidth}|}
    \hline
    Исполнители & Разряд & Тарифный коэффициент & \mbox{Чел./дн.} занятости \\
@@ -455,8 +545,8 @@
 Месячная тарифная ставка одного работника вычисляется по формуле
 \begin{equation}
   \label{eq:econ:month_salary}
-  \text{Т}_\text{ч} = 
-    \frac {\text{Т}_{\text{м}_{1}} \cdot \text{Т}_{\text{к}} } 
+  \text{Т}_\text{ч} =
+    \frac {\text{Т}_{\text{м}_{1}} \cdot \text{Т}_{\text{к}} }
           {\text{Ф}_{\text{р}} }  \text{\,,}
 \end{equation}
 \begin{explanation}
@@ -478,10 +568,10 @@
   \text{Т}_{\text{ч}}^{\text{вед. прогр.}} = \frac{ \num{\tariffRateFirst} \times \num{\tariffFactorSnd} } { \num{\workingHoursInMonth} } = \SI{\salaryPerHourSnd}{\text{\byr}/\text{час.}}
 \end{equation}
 
-Основная заработная плата исполнителей на конкретное ПО рассчитывается по формуле 
+Основная заработная плата исполнителей на конкретное ПО рассчитывается по формуле
 \begin{equation}
   \label{eq:econ:total_salary}
-  \text{З}_{\text{о}} = \sum^{n}_{i = 1} 
+  \text{З}_{\text{о}} = \sum^{n}_{i = 1}
                         \text{Т}_{\text{ч}}^{i} \cdot
                         \text{Т}_{\text{ч}} \cdot
                         \text{Ф}_{\text{п}} \cdot
@@ -504,8 +594,8 @@
 Дополнительная заработная плата включает выплаты предусмотренные законодательством от труде и определяется по нормативу в процентах от основной заработной платы
 \begin{equation}
   \label{eq:econ:additional_salary}
-  \text{З}_{\text{д}} = 
-    \frac {\text{З}_{\text{о}} \cdot \text{Н}_{\text{д}}} 
+  \text{З}_{\text{д}} =
+    \frac {\text{З}_{\text{о}} \cdot \text{Н}_{\text{д}}}
           {100\%} \text{\,,}
 \end{equation}
 \begin{explanation}
@@ -515,7 +605,7 @@
 Приняв норматив дополнительной заработной платы $ \text{Н}_{\text{д}} = \num{\additionalSalaryNormative\%} $ и подставив известные данные в формулу~(\ref{eq:econ:additional_salary}) получим
 \begin{equation}
   \label{eq:econ:additional_salary_calc}
-  \text{З}_{\text{д}} = 
+  \text{З}_{\text{д}} =
     \frac{\num{\totalSalary} \times 20\%}
          {100\%} \approx \SI{\additionalSalary}{\text{\byr}} \text{\,.}
 \end{equation}
@@ -524,7 +614,7 @@
 Общие отчисления на социальную защиту рассчитываются по формуле
 \begin{equation}
   \label{eq:econ:soc_prot}
-  \text{З}_{\text{сз}} = 
+  \text{З}_{\text{сз}} =
     \frac{(\text{З}_{\text{о}} + \text{З}_{\text{д}}) \cdot \text{Н}_{\text{сз}}}
          {\num{100\%}} \text{\,.}
 \end{equation}
@@ -542,7 +632,7 @@
   Расчет налогов от фонда оплаты труда производится формуле
   \begin{equation}
     \label{eq:econ:tax_work_prot}
-    \text{Н}_{\text{е}} = 
+    \text{Н}_{\text{е}} =
       \frac{(\text{З}_{\text{о}} + \text{З}_{\text{д}}) \cdot \text{Н}_{\text{не}}}
            {\num{100\%}} \text{\,,}
   \end{equation}
@@ -553,7 +643,7 @@
   Подставив ранее вычисленные значения в формулу~(\ref{eq:econ:tax_work_prot}) и приняв норматив налога $ \text{Н}_{\text{не}} = \num{\taxWorkProtNormative\%} $ получаем
   \begin{equation}
     \label{eq:econ:tax_work_prot_calc}
-    \text{Н}_{\text{е}} = 
+    \text{Н}_{\text{е}} =
         \frac{ (\num{\totalSalary} + \num{\additionalSalary}) \times \num{\taxWorkProtNormative\%} }
            { \num{100\%} }
       \approx \SI{\taxWorkProtCost}{\text{\byr}}\text{\,.}
@@ -565,7 +655,7 @@
 Затраты на материалы вычисляются по формуле
 \begin{equation}
   \label{eq:econ:stuff}
-  \text{М} = 
+  \text{М} =
     \frac{ \text{З}_{\text{о}} \cdot \text{Н}_{\text{мз}} }
          { \num{100\%} } =
     \frac{ \num{\totalSalary} \times \num{\stuffNormative\%} }
@@ -577,7 +667,7 @@
 \begin{equation}
   \label{eq:econ:machine_time}
   \text{Р}_{\text{м}} =
-    \text{Ц}_{\text{м}} \cdot 
+    \text{Ц}_{\text{м}} \cdot
     \frac {\text{V}_{\text{о}}}
           {\num{100}} \cdot
     \text{Н}_{\text{мв}} \text{\,,}
@@ -593,14 +683,14 @@
 \begin{equation}
   \label{eq:econ:machine_time_calc}
   \text{Р}_{\text{м}} =
-    \num{\oneHourMachineTimeCost} \times 
+    \num{\oneHourMachineTimeCost} \times
     \frac {\num{\totalProgramSizeCorrected}}
           {\num{100}} \times
     \num{\adjustedTimeToDebugCodeNormative} =
     \SI{\machineTimeCost}{\text{\byr}} \text{\,.}
 \end{equation}
 
-Расходы по статье <<научные командировки>> вычисляются как процент от основной заработной платы, либо определяются по нормативу. 
+Расходы по статье <<научные командировки>> вычисляются как процент от основной заработной платы, либо определяются по нормативу.
 Вычисления производятся по формуле
 \begin{equation}
   \label{eq:econ:business_trip}
@@ -637,7 +727,7 @@
   \label{eq:econ:other_cost_calc}
   \text{П}_{\text{з}} =
     \frac{ \num{\totalSalary} \times \num{\otherCostNormative\%} }
-         { \num{100\%} } = 
+         { \num{100\%} } =
     \SI{\otherCost}{\text{\byr}} \text{\,.}
 \end{equation}
 
@@ -658,7 +748,7 @@
   \label{eq:econ:overhead_cost_calc}
   \text{Р}_{\text{н}} =
     \frac{ \num{\totalSalary} \times \num{\overheadCostNormative\%} }
-         { \num{100\%} } = 
+         { \num{100\%} } =
     \SI{\overheadCost}{\text{\byr}} \text{\,.}
 \end{equation}
 
@@ -688,7 +778,7 @@
 Расходы на сопровождение и адаптацию, которые несет производитель ПО, вычисляются по нормативу от суммы расходов по смете и рассчитываются по формуле
 \begin{equation}
   \label{eq:econ:software_support}
-  \text{Р}_{\text{са}} = 
+  \text{Р}_{\text{са}} =
     \frac { \text{С}_{\text{р}} \cdot \text{Н}_{\text{рса}} }
           { \num{100\%} } \text{\,,}
 \end{equation}
@@ -699,7 +789,7 @@
 Приняв значение норматива расходов на сопровождение и адаптацию $ \text{Н}_{\text{рса}} = \num{\supportNormative\%} $ и подставив ранее вычисленные значения в формулу~(\ref{eq:econ:software_support}) получаем
 \begin{equation}
   \label{eq:econ:software_support_calc}
-  \text{Р}_{\text{са}} = 
+  \text{Р}_{\text{са}} =
     \frac { \num{\overallCost} \times \num{\supportNormative\%} }
           { \num{100\%} } \approx \SI{\softwareSupportCost}{\text{\byr}} \text{\,.}
 \end{equation}
@@ -724,11 +814,11 @@
 \begin{comment}
   Оценка коммерческой эффективности проектов ПО предполагает:
   \begin{itemize}
-    \item определение расчётного периода и расчётных шагов проекта; 
+    \item определение расчётного периода и расчётных шагов проекта;
     \item обоснование цены ПО;
-    \item определение денежных потоков с включением всех денежных поступлений по проекту в ходе его осуществления; 
+    \item определение денежных потоков с включением всех денежных поступлений по проекту в ходе его осуществления;
     \item учёт изменения стоимости денег во времени;
-    \item оценку затрат и результатов по проекту в соответствии с  принципом <<без проекта>> и <<с проектом>>; 
+    \item оценку затрат и результатов по проекту в соответствии с  принципом <<без проекта>> и <<с проектом>>;
     \item оценку инфляции и риска;
     \item учёт налогов, сборов, отчислений и льгот, предусмотренных законодательными нормами, действующими в расчётном периоде.
   \end{itemize}
@@ -738,7 +828,7 @@
 Прибыль рассчитывается по формуле
 \begin{equation}
   \label{eq:econ:income}
-  \text{П}_{\text{с}} = 
+  \text{П}_{\text{с}} =
     \frac { \text{С}_{\text{п}} \cdot \text{У}_{\text{рп}} }
           { \num{100\%} } \text{\,,}
 \end{equation}
@@ -750,13 +840,13 @@
 Подставив известные данные в формулу~(\ref{eq:econ:income}) получаем прогнозируемую прибыль от реализации ПО
 \begin{equation}
   \label{eq:econ:income_calc}
-  \text{П}_{\text{с}} = 
+  \text{П}_{\text{с}} =
     \frac { \num{\baseCost} \times \num{\profitability\%} }
-          { \num{100\%} } 
+          { \num{100\%} }
     \approx \SI{\income}{\text{\byr}} \text{\,.}
 \end{equation}
 
-Прогнозируемая цена ПО без учета налогов включаемых в цену вычисляется по формуле 
+Прогнозируемая цена ПО без учета налогов включаемых в цену вычисляется по формуле
 \begin{equation}
   \label{eq:econ:estimated_price}
   \text{Ц}_{\text{п}} = \text{С}_{\text{п}} + \text{П}_{\text{с}}  \text{\,.}
@@ -783,9 +873,9 @@
   Приняв норматив отчислений в местный и республиканский бюджеты $ \text{Н}_{\text{мр}} = \num{\localRepubTaxNormative\%} $ и подставив известные данные в формулу~(\ref{eq:econ:local_repub_tax}) получим величину единого платежа
   \begin{equation}
     \label{eq:econ:local_repub_tax_calc}
-    \text{О}_{\text{мр}} = 
+    \text{О}_{\text{мр}} =
       \frac { \num{\estimatedPrice} \cdot \num{\localRepubTaxNormative\%} }
-            { \num{100\%} - \num{\localRepubTaxNormative\%} } 
+            { \num{100\%} - \num{\localRepubTaxNormative\%} }
       \approx \SI{\localRepubTax}{\text{\byr}} \text{\,.}
   \end{equation}
 \end{comment}
@@ -805,11 +895,11 @@
 \begin{equation}
   \text{НДС} =
     \frac { \num{\estimatedPrice} \times \num{\ndsNormative\%} }
-          { \num{100\% }} 
+          { \num{100\% }}
     \approx \SI{\nds}{\text{\byr}} \text{\,.}
 \end{equation}
 
-Расчет прогнозируемой отпускной цены осуществляется по формуле 
+Расчет прогнозируемой отпускной цены осуществляется по формуле
 \begin{equation}
   \label{eq:econ:selling_price}
   \text{Ц}_{\text{о}} = \text{Ц}_{\text{п}} + \text{НДС} \text{\,.}
@@ -825,7 +915,7 @@
 Чистую прибыль от реализации проекта можно рассчитать по формуле
 \begin{equation}
   \label{eq:econ:income_with_taxes}
-  \text{П}_\text{ч} = 
+  \text{П}_\text{ч} =
     \text{П}_\text{c} \cdot
     \left(1 - \frac{ \text{Н}_\text{п} }{ \num{100\%} } \right) \text{\,,}
 \end{equation}
@@ -836,7 +926,7 @@
 Приняв значение налога на прибыль $ \text{Н}_{\text{н}} = \num{\taxForIncome\%} $ и подставив известные данные в формулу~(\ref{eq:econ:income_with_taxes}) получаем чистую прибыль
 \begin{equation}
   \label{eq:econ:income_with_taxes_calc}
-  \text{П}_\text{ч} = 
+  \text{П}_\text{ч} =
     \num{\income} \times \left( 1 - \frac{\num{\taxForIncome\%}}{100\%} \right) = \SI{\incomeWithTaxes}{\text{\byr}} \text{\,.}
 \end{equation}
 
@@ -848,8 +938,8 @@
 \caption{Рассчитанные данные}
 \label{table:econ:calculated_data}
   \centering
-  \begin{tabular}{| >{\raggedright}m{0.60\textwidth} 
-                  | >{\centering}m{0.17\textwidth} 
+  \begin{tabular}{| >{\raggedright}m{0.60\textwidth}
+                  | >{\centering}m{0.17\textwidth}
                   | >{\centering\arraybackslash}m{0.15\textwidth}|}
     \hline
     {\begin{center}
@@ -925,14 +1015,14 @@
 % Часть, которая, к сожалению, была написана, наверное, зря.
 \begin{comment}
 
-Договоренность с заказчиком предусматривает оплату за ПО после его адаптации на стороне заказчика. 
+Договоренность с заказчиком предусматривает оплату за ПО после его адаптации на стороне заказчика.
 Следствием из данной договоренности являются возникающие риски для организации исполнителя связанные с неуплатой стоимости проекта заказчиком.
 На случай провала сделки с определенным заказчиком рассмотрим бизнес"=план, который предусматривает массовую реализацию разрабатываемого ПО по сниженной цене, и оценим экономическую эффективность разработки с данной точки зрения.
 
 \FPeval{\priceFirstYear}{1500}
 \FPeval{\priceSecondYear}{1250}
 \FPeval{\priceThirdYear}{1000}
-Расчетный период для разрабатываемого проекта состоит из трех интервалов времени длительностью один год. 
+Расчетный период для разрабатываемого проекта состоит из трех интервалов времени длительностью один год.
 На рынке существует достаточное количество как платных так и бесплатных аналогов разрабатываемого продукта. Анализ платных продуктов показал, что начальную цену на одну лицензию целесообразно установить ниже средней на рынке в размере $ P_1 = \SI{\priceFirstYear}{\text{тыс.\,\byr}} $, в последующие отрезки времени расчетного периода $ t_2 $ и $ t_3 $ планируется планомерно снижать цену до $ P_2 = \SI{\priceSecondYear}{\text{тыс.\,\byr}} $ и $ P_3 = \SI{\priceThirdYear}{\text{тыс.\,\byr}} $ для привлечения новых клиентов.
 
 \FPeval{\soldInFirstYear}{30}
@@ -974,7 +1064,7 @@
     & $ \text{Р}^\text{н}_i $ & налоги, уплачиваемые из прибыли.
 \end{explanation}
 
-Прогнозируемые постоянные и переменные затраты, а также налоги и выходные денежные потоки приведены в таблице~\ref{table:econ:justification}. Норматив налога на прибыль принят $ \text{Н}_\text{нп} = \num{12\%} $. 
+Прогнозируемые постоянные и переменные затраты, а также налоги и выходные денежные потоки приведены в таблице~\ref{table:econ:justification}. Норматив налога на прибыль принят $ \text{Н}_\text{нп} = \num{12\%} $.
 
 \FPeval{\firstYearVariableCosts}{17200}
 \FPeval{\secondYearVariableCosts}{18300}
@@ -1061,7 +1151,7 @@
     & $ g_i $ & премия за отдельный риск по конкретному фактору, \%.
 \end{explanation}
 
-Примем во внимание экономическую обстановку в Беларуси на начало 2013 года, чтобы получить значения коэффициента дисконтирования. 
+Примем во внимание экономическую обстановку в Беларуси на начало 2013 года, чтобы получить значения коэффициента дисконтирования.
 Безрисковая ставка ссудного процента составляет $r = \num{5.5\%}$, возможное влияние непредвиденных обстоятельств на величину этой ставки оценим премией за риск $ g_1 = \num{1\%} $.
 По различным данным инфляция в 2013 году в Беларуси составит $ s = \num{21\%} $. Дополнительно учтем риски падения спроса $ g_2 = \num{1\%} $ и падения дохода $ g_3 = \num{1\%}$.
 Подставляя приведенные данные в формулу~(\ref{eq:econ:discount_rate}) получаем
@@ -1079,17 +1169,17 @@
 где & $ t $ & номер отрезка времени расчетного периода с момента старта проекта, \%.
 \end{explanation}
 
-Основным показателем экономической целесообразности реализации проекта является чистый дисконтированный доход. 
+Основным показателем экономической целесообразности реализации проекта является чистый дисконтированный доход.
 Разрабатываемый проект предусматривает одноразовые начальные инвестиции, поэтому чистый дисконтированный доход может быть рассчитан по формуле
 \begin{equation}
   \label{eq:econ:net_present_value}
   \text{ЧДД} = -\text{И}_{0} + \sum_{t = 1}^m \text{ДП}^\text{п}_i \cdot \alpha_i - \sum_{t = 1}^m \text{ДП}_\text{о}^i \cdot \alpha_i \text{\,,}
 \end{equation}
 
-Прогнозируемые значения ЧДД приведены в таблице~\ref{table:econ:justification}. 
+Прогнозируемые значения ЧДД приведены в таблице~\ref{table:econ:justification}.
 Т.\,к.~значение данного экономичекого показателя $ \text{ЧДД} > 0 $, то проект приносит прибыль.
 Мы не распологаем бухгалтерскими данными по аналогичным проектам, поэтому вычисление индекса рентабельности не несет в себе полезной нагрузки и он не может быть использован для сравнения проектов.
-С финансовой точки зрения срок окупаемости проекта является спорным показателем эффективности~\cite[с.~166\,--\,167]{crundwell_2008}, по этой и по приведенной раньше причине точный расчет данного показателя производить не будем. 
+С финансовой точки зрения срок окупаемости проекта является спорным показателем эффективности~\cite[с.~166\,--\,167]{crundwell_2008}, по этой и по приведенной раньше причине точный расчет данного показателя производить не будем.
 По прогнозируемым данным приведенным в таблице~\ref{table:econ:justification} приблизительный срок окупаемости проекта составит $ \text{Т}_\text{ок} \approx \SI{2}{\text{года}} $.
 
 
@@ -1097,26 +1187,26 @@
 \caption{Прогнозные данные реализации проекта ПО}
 \label{table:econ:justification}
 \centering
-  \begin{tabular}{| >{\raggedright}m{0.34\textwidth} 
-                  | >{\centering}m{0.091\textwidth} 
-                  | >{\centering}m{0.105\textwidth} 
-                  | >{\centering}m{0.105\textwidth} 
-                  | >{\centering}m{0.1\textwidth} 
+  \begin{tabular}{| >{\raggedright}m{0.34\textwidth}
+                  | >{\centering}m{0.091\textwidth}
+                  | >{\centering}m{0.105\textwidth}
+                  | >{\centering}m{0.105\textwidth}
+                  | >{\centering}m{0.1\textwidth}
                   | >{\centering\arraybackslash}m{0.1\textwidth}|}
     \hline
       \multirow{3}{0.34\textwidth}{\centering Показатели} &
       \multirow{3}{0.091\textwidth}{\centering Ед. измер.} &
       \multicolumn{4}{c|}{\centering Значения показателей по шагам} \\
-    
-    \cline{3-6} 
+
+    \cline{3-6}
     & & 2013 & 2014 & 2015 & 2016 \\
     & & $ t_0 $ & $ t_1 $ & $ t_2 $ & $ t_3 $ \\
-    
+
     \hline
     1 & 2 & 3 & 4 & 5 & 6 \\
-    
+
     \hline
-    Объём производства и реализации & штук & & \num{\soldInFirstYear} & \num{\soldInSecondYear} & \num{\soldInThirdYear} \\ 
+    Объём производства и реализации & штук & & \num{\soldInFirstYear} & \num{\soldInSecondYear} & \num{\soldInThirdYear} \\
 
     \hline
     Прогнозная рыночная цена & тыс.\,\byr & & \num{\priceFirstYear} & \num{\priceSecondYear} & \num{\priceThirdYear} \\
@@ -1154,7 +1244,7 @@
     \hline
     Капитальные вложения & тыс.\,\byr & \num{\capitalInvestments} & & & \\
 
-    \hline 
+    \hline
     Коэффициент дисконтирования & & \num{\zyDiscountFactor} & \num{\fyDiscountFactor} & \num{\syDiscountFactor} & \num{\tyDiscountFactor} \\
 
     \hline
@@ -1166,12 +1256,12 @@
     \hline
     Сумма дисконтированного денежного притока & тыс.\,\byr & & \num{\fyCashFlowIncomeDiscounted} & \num{\syCashFlowIncomeDiscounted} & \num{\tyCashFlowIncomeDiscounted} \\
 
-    \hline 
+    \hline
     Сумма дисконтированного денежного оттока & тыс.\,\byr & \num{\capitalInvestments} & \num{\fyCashFlowOutcomeDiscounted} & \num{\syCashFlowOutcomeDiscounted} & \num{\tyCashFlowOutcomeDiscounted} \\
 
-    \hline 
+    \hline
     Сумма чистого дисконтированного денежного дохода нарастающим итогом & тыс.\,\byr & \num{\zyNetIncomeAcc} & \num{\fyNetIncomeAcc} & \num{\syNetIncomeAcc} & \num{\tyNetIncomeAcc} \\
- 
+
     \hline
 
   \end{tabular}
