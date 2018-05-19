@@ -8,6 +8,7 @@ endif
 PDFLATEX = pdflatex
 DIPLOMA_REPORT_PDF = diploma_report
 PRACTICE_REPORT_PDF = practice_report
+ECONOMICS_REPORT_PDF = economics_report
 COURSE_REPORT_PDF = course_report
 TITLE_PDF = diploma_title_only
 TASK_PDF = diploma_task_only
@@ -18,6 +19,7 @@ GREP = grep
 
 #all: $(DIPLOMA_REPORT_PDF).pdf $(PRACTICE_REPORT_PDF).pdf $(TITLE_PDF).pdf $(TASK_PDF).pdf
 all: $(PRACTICE_REPORT_PDF).pdf
+#all: $(ECONOMICS_REPORT_PDF).pdf
 
 
 publish_to_dropbox: all
@@ -35,7 +37,6 @@ fastcheck: *.tex
 	$(PDFLATEX) $(DIPLOMA_REPORT_PDF)
 	mv $(DIPLOMA_REPORT_PDF).pdf $(DIPLOMA_REPORT_PDF)-`date +'%m-%d-%H-%M-%S'`.pdf
 
-
 $(DIPLOMA_REPORT_PDF).pdf: *.tex
 	$(PDFLATEX) $(DIPLOMA_REPORT_PDF)
 	$(BIBTEX) $(DIPLOMA_REPORT_PDF).aux
@@ -43,6 +44,11 @@ $(DIPLOMA_REPORT_PDF).pdf: *.tex
 	$(PDFLATEX) $(DIPLOMA_REPORT_PDF)
 	cp $(DIPLOMA_REPORT_PDF).pdf ../example_diploma.pdf
 
+$(ECONOMICS_REPORT_PDF).pdf: *.tex
+	$(PDFLATEX) $(ECONOMICS_REPORT_PDF)
+	$(BIBTEX) $(ECONOMICS_REPORT_PDF).aux
+	$(PDFLATEX) $(ECONOMICS_REPORT_PDF)
+	$(PDFLATEX) $(ECONOMICS_REPORT_PDF)
 
 $(PRACTICE_REPORT_PDF).pdf: *.tex
 	$(PDFLATEX) $(PRACTICE_REPORT_PDF)
