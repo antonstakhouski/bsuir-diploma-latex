@@ -10,6 +10,7 @@ COURSE_REPORT_PDF	Makefile	/^COURSE_REPORT_PDF = course_report$/;"	m
 DIPLOMA_REPORT_PDF	Makefile	/^DIPLOMA_REPORT_PDF = diploma_report$/;"	m
 DROPBOX_PUBLIC	Makefile	/^	DROPBOX_PUBLIC=$(HOME)\/Dropbox\/Public$/;"	m
 DROPBOX_PUBLIC	Makefile	/^	DROPBOX_PUBLIC=$(USERPROFILE)\/Dropbox\/Public$/;"	m
+ECONOMICS_REPORT_PDF	Makefile	/^ECONOMICS_REPORT_PDF = economics_report$/;"	m
 GREP	Makefile	/^GREP = grep$/;"	m
 Netica	sec_domain.tex	/^Но функциональность, обеспечивающая автоматический вывод структуры сети по данным, отсутствует.$/;"	b
 PDFLATEX	Makefile	/^PDFLATEX = pdflatex$/;"	m
@@ -23,3 +24,7 @@ clearpage startsection section	preamble.tex	/^\\renewcommand\\section{%$/;"	s
 fsharp	sec_tech.tex	/^Ключевым словом \\lstinline[style=csharpinlinestyle]!async! помечаются методы и лямбда"=выражения, которые внутри содержат ожидание выполнения асинхронных операций с помощью оператора \\lstinline[style=csharpinlinestyle]!await!, который отвечает за преобразования кода метода во время компиляции.$/;"	b
 startsection subsection	preamble.tex	/^\\renewcommand\\subsection{%$/;"	b
 startsection subsubsection	preamble.tex	/^\\renewcommand\\subsubsection{$/;"	b
+texttt QTestPrinter	sec_func.tex	/^\\label{sec:func}$/;"	b
+texttt VTest _BINS3	sec_func.tex	/^\\end{itemize}$/;"	b
+texttt VTest _KNS2	sec_func.tex	/^\\end{itemize}$/;"	b
+texttt VTest _MNSTO	sec_func.tex	/^\\end{itemize}$/;"	b
