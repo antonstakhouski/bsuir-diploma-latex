@@ -155,7 +155,7 @@
 \end{itemize}
 
 \subsection{Класс \texttt{VTest\_MNSTO}}
-Данный класс отвечает за тестирование МНСТО. МНСТО работает по соответствующему протоколу.
+Данный класс отвечает за тестирование работы МНСТО. МНСТО работает по одноименному протоколу.
 
 Класс \texttt{VTest\_MNSTO} имеет следующие методы и внутренние переменные:
 \begin{itemize}
@@ -225,4 +225,139 @@
 		соответствующего формата. Переменные \texttt{m\_mes01} и \texttt{m\_mes02} используются в функциях
 		\texttt{decodeMes01} и \texttt{decodeMes02} соответственно для удобного доступа к различным полям в
 		заголовках дейтаграмм.
+\end{itemize}
+
+\subsection{Блок журналирования}
+Данный блок осуществляет ведение журнала функционального тестирования устройств. Блок состоит из следующих компонентов:
+
+\subsubsection{Структура \texttt{DeviceInfo}}
+Структура \texttt{DeviceInfo} представляет собой запись о результатах тестирования одного устройства.
+Данная структура содержит следующие поля:
+\begin{itemize}
+	\item \texttt{deviceName} -- поле, в котором хранится имя тестируемого устройства;
+	\item \texttt{resultMessage} -- поле, в котором хранится информация о результатах тестирования;
+	\item \texttt{additionalInfo} -- поле, предназначенное для хранения дополнительной информации о
+		результатах тестирования устройства;
+	\item \texttt{hasError} -- флаг, который указывает на наличие ошибок, обнаруженных в ходе
+		тестирования устройства.
+\end{itemize}
+
+\subsubsection{Класс \texttt{JournalEntry}}
+Данный класс используется для формирования записи о результатах тестирования устройств.
+
+Данный класс содержит следующие методы и переменные класса, в нем также объявлены следующие структуры:
+\begin{itemize}
+	\item Переменная \texttt{date} служит для хранения информации о времени проведения тестирования.
+
+	\item Переменная \texttt{devices} является списком, хранящим структуры\break \texttt{DeviceInfo}. Таким образом,
+		данный список хранит информацию о результатах последнего тестирования устройств.
+
+	\item Метод \texttt{addDevice} осуществляет добавление нового устройства к списку \texttt{devices}. Данный метод
+		принимает в качестве параметров структуру типа \texttt{DeviceInfo}.
+
+	\item Метод \texttt{getDate} служит для получения значения переменной \texttt{date}.
+
+	\item Метод \texttt{getDevices} возвращает список устройст \texttt{devices}.
+\end{itemize}
+
+\subsubsection{Класс \texttt{Journal}}
+Класс \texttt{Journal} служит для записи результатов тестирования в журнал. Для удобства операций с жураналом
+тестирования, результаты тестирования хранятся в формате JSON. Класс \texttt{Journal} содержит следующие методы:
+\begin{itemize}
+	\item Метод \texttt{store} служит для добавления новой записи в журнал тестирования. Перед добавлением новой
+		записи \texttt{JournalEntry} в файл, она конвертируется в JSON строку c помощью метода \texttt{asJSON}.
+		Перед записью в файл, происходит считывание всего файла, после чего новая запись добавляется к массиву
+		записей с помощью метода \texttt{appendEntryToArray}.
+
+	\item Метод \texttt{asJSON} принимает запись типа \texttt{JournalEntry} и преобразует ее в JSON строку.
+		Все данные структуры, включая имена полей, преобразуются в удобный для чтения текст. Также в
+		результирующую строку добавляется информация о дате проведения тестирования.
+
+	\item Метод \texttt{appendEntryToArray} принимаетс сылки на журнал тестирования \texttt{jsonArray} и новую
+		запись \texttt{jsonJournalEntry}. Данный метод осуществляет добавление новой записи в массив
+		\texttt{jsonArray}.
+\end{itemize}
+
+\subsection{Класс \texttt{OffLineFuncControl}}
+Данный класс представляет собой управляющий модуль.\break \texttt{OffLineFuncControl}осуществляет взаимодействие с элементами графического
+интерфейса, а также с классами, отвечающими за тестирование периферийных устройств.
+Данный класс включает в себя следующие методы и переменные:
+\begin{itemize}
+	\item Переменная \texttt{m\_pTreeDevice}
+	\item Переменная \texttt{m\_pBtStart}
+	\item Переменная \texttt{m\_pBtPrint}
+	\item Переменная \texttt{m\_pBtSettings}
+	\item Переменная \texttt{m\_pBtJournal}
+	\item Переменная \texttt{m\_pBtTestKS}
+	\item Переменная \texttt{m\_pBtExit}
+
+	\item Переменная \texttt{m\_bStartTest}
+	\item Переменная \texttt{m\_Menu}
+	\item Переменная \texttt{m\_pActInfo}
+
+	\item Переменная \texttt{m\_syncroTime}
+
+	\item Переменная \texttt{m\_sockReceiveUpdate}
+
+	\item Переменная \texttt{m\_sockReceiveUpdate}
+
+	\item Переменная \texttt{m\_pActSetParam}
+	\item Переменная \texttt{m\_pMenuSNS}
+	\item Переменная \texttt{m\_pActSNS\_GPS\_GLONASS}
+	\item Переменная \texttt{m\_pActSNS\_GPS}
+	\item Переменная \texttt{m\_pActSNS\_GLONASS}
+
+	\item Переменная \texttt{m\_pActSetTimeOnServer}
+	\item Переменная \texttt{m\_pActSetTimeFromGPS}
+
+	\item Переменная \texttt{ntpHelperPtr}
+
+	\item Переменная \texttt{timePickWidget}
+	\item Переменная \texttt{dateTimeEdit}
+	\item Переменная \texttt{m\_pBtConfirmDate}
+
+	\item Метод \texttt{messageReceived}
+	\item Метод \texttt{resizeEvent}
+	\item Метод \texttt{closeEvent} служит для переопределения стандартного метода закрытия окна. Данный метод
+		служит для отправки служебных сообщений имитаторам устройств перед завершением программы.
+
+	\item Метод \texttt{loadDevices}
+	\item Метод \texttt{receiveSignalUpdate} срабатывает после получения сигнала \texttt{readyRead} от
+		\texttt{m\_sockReceiveUpdate}. Данный метод служит для получения дейтаграмм. После получения каждой
+		дейтаграммы управление передается методу \texttt{loadDevices} для дальнейшей обработки.
+
+	\item Метод \texttt{onTestARM}
+
+	\item Метод \texttt{onChangeCheckDevice}
+	\item Метод \texttt{onStart}
+	\item Метод \texttt{onMenu}
+	\item Метод \texttt{onInfo}
+	\item Метод \texttt{onInfoDevice} связан с кнопкой \texttt{pBtInfo}. Данный метод служит для предоставления
+		информации о выбранном устройстве.
+
+	\item Метод \texttt{onPrint}
+	\item Метод \texttt{onJournal}
+	\item Метод \texttt{print}
+	\item Метод \texttt{onSettings}
+	\item Метод \texttt{onTestKS}
+	\item Метод \texttt{onManualSetTime} вызывается при срабатывании триггера \texttt{m\_pActSetTimeOnServer}.
+		Данный метод выводит на экран\break \texttt{timePickWidget}.
+
+	\item Метод \texttt{onGetTimeFromGps} вызывается при срабатывании триггера \texttt{m\_pActGetTimeFromGps}.
+		Данный метод позволяет получить время, используя данные, полученные с помощью GPS. Полученные данные
+		хранятся в переменной \texttt{dateTimeEdit}.
+
+	\item Метод \texttt{onSelectTime} устанавливает время на сервере с помощью метода \texttt{setServerTime}. Метод
+		\texttt{onSelectTime} вызывается при нажатии кнопки {m\_btConfirmDate}.
+		метод \texttt{setServerTime} передается время полученное в результате вызова внутреннего метода
+		\texttt{dateTime} объекта \texttt{dateTimeEdit}.
+
+	\item Метод \texttt{saveRezTest}
+	\item Метод \texttt{initNtp} инициалирует \texttt{ntpHelperPtr}. Данный метод позволяет установить соединение с
+		ntp сервером.
+
+	\item Метод \texttt{setServerTime} позволяет установить время на ntp сервере. Для этого используются методы
+		объекта \texttt{ntpHelperPtr}.
+
+	\item Метод \texttt{onTestTimeServer}
 \end{itemize}
