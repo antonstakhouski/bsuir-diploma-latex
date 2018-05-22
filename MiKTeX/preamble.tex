@@ -2,31 +2,33 @@
 % Зачем: Определяет класс документа (То, как будет выглядеть документ)
 % Примечание: параметр draft помечает строки, вышедшие за границы страницы, прямоугольником, в фильной версии его нужно удалить.
 \documentclass[a4paper,14pt,russian,oneside,final]{extreport}
+\usepackage{xltxtra}
+\usepackage{polyglossia}
+\usepackage{ucharclasses}
+\usepackage{microtype} % better management of overfulls
 
-% Зачем: Настройка Times New Roman.
-% Рекомендовано для Windows (нужен PSCyr, подробности см. в fonts_windows.tex)
-% раскомментировать, чтобы использовать:
-\input{fonts_windows}% не забудьте закомментировать \input{fonts_linux}
+%\usepackage{mathtools}
+\usepackage{amsfonts}
+% Зачем: Поддержка ажурного и готического шрифтов
+%\usepackage{amsfonts}
+\usepackage{amsmath}
+% Зачем: amsfonts + несколько сотен дополнительных математических символов
+\usepackage{amssymb}
+\usepackage{array}
+%\usepackage{unicode-ath}
 
-% Рекомендовано для Linux (нужен scalable-cyrfonts-tex, подробности см. в fonts_linux.tex)
-% раскомментировать, чтобы использовать:
-%\input{fonts_linux}% не забудьте закомментировать \input{fonts_windows}
-
-% Зачем: Установка кодировки исходных файлов.
-\usepackage[utf8]{inputenc}
-
-% Зачем: Делает результирующий PDF "searchable and copyable".
-\usepackage{cmap}
+% Зачем: Удобная вёрстка многострочных формул, масштабирующийся текст в формулах, формулы в рамках и др
+%\usepackage{amsmath}
 
 % Зачем: Чтобы можно было использовать русские буквы в формулах, но в случае использования предупреждать об этом.
 \usepackage[warn]{mathtext}
 
 % Зачем: Учет особенностей различных языков.
-\usepackage[russian]{babel}
+%\usepackagerussian]{babel}
 
-% Зачем: Добавляет поддержу дополнительных размеров текста 8pt, 9pt, 10pt, 11pt, 12pt, 14pt, 17pt, and 20pt.
-% Почему: Пункт 2.1.1 Требований по оформлению пояснительной записки.
-\usepackage{extsizes}
+ %Зачем: Добавляет поддержу дополнительных размеров текста 8pt, 9pt, 10pt, 11pt, 12pt, 14pt, 17pt, and 20pt.
+ %Почему: Пункт 2.1.1 Требований по оформлению пояснительной записки.
+%\usepackage{extsizes}
 
 
 % Зачем: Длинна, пимерно соответвующая 5 символам
@@ -55,7 +57,7 @@
 % Зачем: Выбор шрифта по-умолчанию.
 % Почему: Пункт 2.1.1 Требований по оформлению пояснительной записки.
 % Примечание: В требованиях не указан, какой именно шрифт использовать. По традиции используем TNR.
-\renewcommand{\rmdefault}{ftm} % Times New Roman
+%\renewcommand{\rmdefault{ftm} % Times New Roman
 
 
 % Зачем: Отключает использование изменяемых межсловных пробелов.
@@ -131,7 +133,7 @@
     {\fivecharsapprox}%
     {-1em \@plus -1ex \@minus -.2ex}%
     {1em \@plus .2ex}%
-    {\raggedright\hyphenpenalty=10000\normalfont\normalsize\MakeUppercase}}
+    {\raggedright\hyphenpenalty=10000\exhyphenpenalty=10000\normalfont\normalsize\MakeUppercase}}
 \makeatother
 
 % Зачем: Задает стиль заголовков подразделов
@@ -142,7 +144,7 @@
     {\fivecharsapprox}%
     {-1em \@plus -1ex \@minus -.2ex}%
     {1em \@plus .2ex}%
-    {\raggedright\hyphenpenalty=10000\normalfont\normalsize}}
+    {\raggedright\hyphenpenalty=10000\exhyphenpenalty=10000\normalfont\normalsize}}
 \makeatother
 
 
@@ -155,7 +157,7 @@
     {-1em \@plus -1ex \@minus -.2ex}%
     {1em \@plus .2ex}%
     %{\z@}%
-    {\raggedright\hyphenpenalty=10000\normalfont\normalsize}}
+    {\raggedright\hyphenpenalty=10000\exhyphenpenalty=10000\normalfont\normalsize}}
 \makeatother
 
 % Зачем: для оформления введения и заключения, они должны быть выровнены по центру.
@@ -166,7 +168,7 @@
     {\z@}%
     {-1em \@plus -1ex \@minus -.2ex}%
     {1em \@plus .2ex}%
-    {\centering\hyphenpenalty=10000\normalfont\normalsize\MakeUppercase}%
+    {\centering\hyphenpenalty=10000\exhyphenpenalty=10000\normalfont\normalsize\MakeUppercase}%
     }
 \makeatother
 
@@ -177,7 +179,7 @@
     {\z@}%
     {-1em \@plus -1ex \@minus -.2ex}%
     {1sp \@plus .1em}%
-    {\centering\hyphenpenalty=10000\normalfont\normalsize\MakeUppercase}%
+    {\centering\hyphenpenalty=10000\exhyphenpenalty=10000\normalfont\normalsize\MakeUppercase}%
     }
 \makeatother
 
@@ -190,8 +192,9 @@
 
 % Зачем: Пакет для вставки картинок
 % Примечание: Объяснение, зачем final - http://tex.stackexchange.com/questions/11004/why-does-the-image-not-appear
-\usepackage[final]{graphicx}
-\DeclareGraphicsExtensions{.pdf,.png,.jpg,.eps}
+%\usepackage[final]{graphicx}
+\usepackage{graphicx}
+%\DeclareGraphicsExtensions{.pdf,.png,.jpg,.eps}
 
 
 % Зачем: Директория в которой будет происходить поиск картинок
@@ -199,7 +202,7 @@
 
 
 % Зачем: Добавление подписей к рисункам
-\usepackage[nooneline]{caption}
+\usepackage[nooneline,aboveskip=0pt]{caption}
 \usepackage{subcaption}
 
 % Зачем: чтобы работала \No в новых латехах
@@ -221,7 +224,7 @@
 \DeclareCaptionLabelSeparator{stb}{~--~}
 \captionsetup{labelsep=stb}
 \captionsetup[figure]{labelformat=stbfigure,justification=centering}
-\captionsetup[table]{labelformat=stbtable,justification=raggedright}
+\captionsetup[table]{labelformat=stbtable,justification=raggedright,format=hang}
 \renewcommand{\thesubfigure}{\asbuk{subfigure}}
 
 % Зачем: Окружения для оформления формул
@@ -231,17 +234,17 @@
 \newlength{\lengthWordWhere}
 \settowidth{\lengthWordWhere}{где}
 \newenvironment{explanationx}
-    {%
-    %%% Следующие строки определяют специфические требования разных редакций стандартов. Раскоменнтируйте нужную строку
-    %% стандартный абзац, СТП-01 2010
-    %\begin{itemize}[leftmargin=0cm, itemindent=\parindent + \lengthWordWhere + \labelsep, labelsep=\labelsep]
-    %% без отступа, СТП-01 2013
-    \begin{itemize}[leftmargin=0cm, itemindent=\lengthWordWhere + \labelsep , labelsep=\labelsep]%
-    \renewcommand\labelitemi{}%
-    }
-    {%
-    %\\[\parsep]
-    \end{itemize}
+    {
+	    % Следующие строки определяют специфические требования разных редакций стандартов. Раскоменнтируйте нужную строку
+	    % стандартный абзац, СТП-01 2010
+	    %\begin{itemize}[leftmargin=0cm, itemindent=\parindent + \lengthWordWhere + \labelsep, labelsep=\labelsep]
+	    % без отступа, СТП-01 2013
+	    \begin{itemize}[leftmargin=0cm, itemindent=\lengthWordWhere + \labelsep , labelsep=\labelsep]
+			    \renewcommand\labelitemi{}
+			    }
+			    {
+				    %\\[\parsep]
+	    \end{itemize}
     }
 
 % Старое окружение для "где". Сохранено для совместимости
@@ -249,34 +252,19 @@
 
 \newenvironment{explanation}
     {
-    %%% Следующие строки определяют специфические требования разных редакций стандартов. Раскоменнтируйте нужные 2 строки
-    %% стандартный абзац, СТП-01 2010
-    \par
-    \tabularx{\textwidth-\fivecharsapprox}{@{}ll@{ --- } X }
+    %% Следующие строки определяют специфические требования разных редакций стандартов. Раскоменнтируйте нужные 2 строки
+    % стандартный абзац, СТП-01 2010
+    %\par
+    %\tabularx{\textwidth-\fivecharsapprox}{@{}ll@{ --- } X }
     %% без отступа, СТП-01 2013
-    %\noindent
-    %\tabularx{\textwidth}{@{}ll@{ --- } X }
+    \noindent
+    \tabularx{\textwidth}{@{}ll@{ --- } X }
     }
     {
     \\[\parsep]
     \endtabularx
     }
 
-
-% Зачем: Удобная вёрстка многострочных формул, масштабирующийся текст в формулах, формулы в рамках и др
-\usepackage{amsmath}
-
-
-% Зачем: Поддержка ажурного и готического шрифтов
-\usepackage{amsfonts}
-
-
-% Зачем: amsfonts + несколько сотен дополнительных математических символов
-\usepackage{amssymb}
-
-
-% Зачем: Окружения «теорема», «лемма»
-\usepackage{amsthm}
 
 
 % Зачем: Производить арифметические операции во время компиляции TeX файла
@@ -487,17 +475,15 @@
 \newlist{legal}{enumerate}{10}
 \setlist[legal]{font=\bfseries}
 
-%\usepackage{courier}
-%\setmonofont{Courier New}
+% Установка шрифтов
+\setmainlanguage{russian}
+\setotherlanguage{english}
+\setmainfont[Ligatures=TeX]{Times New Roman}
+\setmonofont[Ligatures=TeX]{Courier New}
 
-%\usepackage{titlesec}
-%\titlespacing{\chapter}{0pt}{0pt}{4pt}
+\newfontfamily{\cyrillicfont}[Ligatures=TeX]{Times New Roman}
+\newfontfamily{\cyrillicfonttt}[Ligatures=TeX]{Courier New}
 
-%\titleformat{\section}
-    %{\normalfont\normalsize}
-    %{\thesection}{1em}{\MakeUppercase}
-
-%\titleformat{\subsection}
-    %{\normalfont\normalsize}
-    %{\thesubsection}{1em}{}
-
+% Пакет для создания содержания
+\usepackage[nottoc]{tocbibind} % Don't include ToC line in ToC
+\usepackage{tocloft}

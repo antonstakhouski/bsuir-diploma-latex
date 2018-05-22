@@ -1,6 +1,6 @@
 \input{preamble}
 
-\input{macro_glob}
+%\input{macro_glob}
 
 \begin{document}
 
@@ -8,24 +8,20 @@
 
 \pagenumbering{gobble}
 
-% \input{abstract} % page 2
-%
-\input{diploma_task} % pages 3 and 4. printed separately
-
-% \input{annotation} % not part of report
-
-%\input{feedback} % not part of report
-
-%\input{review} % not part of report
+\input{diploma_task} % pages 2 and 3. printed separately
 
 \input{table_of_contents}
 
 \pagenumbering{arabic}
-\setcounter{page}{4}
+\setcounter{page}{5}
 
 \input{diploma_content}
 
 \input{references}
+
+\input{sec_add_a}
+
+\input{sec_add_b}
 
 % \includepdf позволяет включить в результирующий pdf документ часть другого pdf документа, сделанного
 % например не с помощью TeX. Бывает полезно, если какие-то диаграммны нарисованы, например, с помощью

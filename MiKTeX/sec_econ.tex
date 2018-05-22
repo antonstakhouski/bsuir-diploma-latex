@@ -78,16 +78,15 @@
 
 Система функционального контроля технических средств КМУ артиллерийского дивизиона предназначена для использования в
 армейских подразделениях. Данная система используется как часть комплекса автоматизации АРМ артиллерийского дивизиона.
-Система предназначена для обнаружения, настройки и тестирования ТС артиллерийского дивизиона.
 
-Разработанная система обладает следующим функционалом:
+Разработанная система обладает следующими функциями:
 \begin{itemize}
-		\item обнаружение и настройка подключенных к АРМ технических средств
-		\item тестирование и настройка метеокомплекта
-		\item тестирование и настройка навигационной системы
-		\item тестирование радиоканалов
-		\item тестирование специального принтера
-		\item тестирование и настройка ЛВС
+		\item тестирование АРМ;
+		\item тестирование АВСКУ;
+		\item тестирование специального принтера;
+		\item тестирование КНС;
+		\item тестирования МНСТО;
+		\item ведение журнала тестирования.
 \end{itemize}
 
 Данный продукт разрабатывается под заказ для вооруженных сил.
@@ -111,7 +110,6 @@
 размеров месячной заработной платы каждого из участника команды, а также общей трудоемкости разработки программного
 обеспечения.
 
-Основная заработная плата исполнителей проекта определяется по формуле~\ref{eq:econ:main_salary}
 
 \begin{equation}
   \label{eq:econ:main_salary}
@@ -130,7 +128,7 @@
 
 \begin{equation}
   \label{eq:econ:hour_salary}
-	\text{З}_\text{чi} = \text{З}_\text{мi} \cdot \text{Ф}_\text{рв} \text{\,,}
+	\text{З}_\text{чi} = \frac{\text{З}_\text{мi}}{\text{Ф}_\text{рв}} \text{\,,}
 \end{equation}
 
 \begin{explanation}
@@ -193,7 +191,7 @@
 
 \begin{equation}
   \label{eq:econ:extra_salary}
-	\text{З}_\text{д} = \text{З}_\text{о} \cdot \text{Н}_\text{д} \text{\,,}
+	\text{З}_\text{д} = \frac{\text{З}_\text{о} \cdot \text{Н}_\text{д}}{\num{100}} \text{\,,}
 \end{equation}
 
 \begin{explanation}
@@ -205,7 +203,7 @@
 
 \begin{equation}
   \label{eq:econ:extra_salary_calc}
-	\text{З}_\text{д} = \frac{\num{\totalSalary} \cdot \num{\normExtraSalary}}{100} = \num{\extraSalary} {\text{ \byr}} \text{.}
+	\text{З}_\text{д} = \frac{\num{\totalSalary} \cdot \num{\normExtraSalary}}{\num{100}} = \num{\extraSalary} {\text{ \byr}} \text{.}
 \end{equation}
 
 \subsubsection{Отчисления на социальные нужды}
@@ -214,7 +212,7 @@
 
 \begin{equation}
   \label{eq:econ:social_fees}
-	\text{Р}_\text{соц} = \frac{(\text{З}_\text{о} + \text{З}_\text{д}) \cdot \text{Н}_\text{соц}} {100} \text{\,,}
+	\text{Р}_\text{соц} = \frac{(\text{З}_\text{о} + \text{З}_\text{д}) \cdot \text{Н}_\text{соц}} {\num{100}} \text{\,,}
 \end{equation}
 
 \begin{explanation}
@@ -225,18 +223,18 @@
 
 \begin{equation}
   \label{eq:econ:social_fees_calc}
-	\text{З}_\text{о} = \frac{(\num{\totalSalary} + \num{\extraSalary}) \cdot \num{\socialFeesCoeff}}{100} =
+	\text{З}_\text{о} = \frac{(\num{\totalSalary} + \num{\extraSalary}) \cdot \num{\socialFeesCoeff}}{\num{100}} =
 	\num{\socialFees} {\text{ \byr}} \text{.}
 \end{equation}
 
 \subsection{Прочие отчисления}
 
 Прочие затраты включаются в себестоимость разработки ПО в процентах от затрат на основную заработную плату команды
-разработчиков  по формуле~\ref{eq:econ:extra_fees}
+разработчиков.
 
 \begin{equation}
   \label{eq:econ:extra_fees}
-	\text{З}_\text{пз} = \frac{\text{З}_\text{о} \cdot \text{Н}_\text{пз}} {100} \text{\,,}
+	\text{З}_\text{пз} = \frac{\text{З}_\text{о} \cdot \text{Н}_\text{пз}} {\num{100}} \text{\,,}
 \end{equation}
 
 \begin{explanation}
@@ -247,7 +245,7 @@
 
 \begin{equation}
   \label{eq:econ:extra_fees_calc}
-	\text{З}_\text{пз} = \frac{\num{\totalSalary} \cdot \num{\socialFeesCoeff}}{100} =
+	\text{З}_\text{пз} = \frac{\num{\totalSalary} \cdot \num{\socialFeesCoeff}}{\num{100}} =
 	\num{\extraFees} {\text{ \byr}} \text{.}
 \end{equation}
 
@@ -292,7 +290,7 @@
 \subsection{Экономический эффект}
 
 При разработке программного обеспечения под заказ экономический эффект может быть рассчитан как для
-организации-разработчика, так и для заказчика ПО. В нашем случае, экономический эффект получает только организация-разработчик.
+организации-разработчика, так и для заказчика ПО. В нашем случае, экономический эффект получает только\break организация-разработчик.
 
 Экономическим эффектом для организации-разработчика является чистая прибыль,
 если организация является плательщиком налогов, либо прибыль до налогообложения, если организация освобождена от уплаты
@@ -303,7 +301,7 @@
 
 \begin{equation}
   \label{eq:econ:clean_profit}
-	\text{П}_\text{ч} = \text{П} - \frac{\text{П} \cdot \text{Н}_\text{п}} {100} \text{\,,}
+	\text{П}_\text{ч} = \text{П} - \frac{\text{П} \cdot \text{Н}_\text{п}} {\num{100}} \text{\,,}
 \end{equation}
 
 \begin{explanation}
@@ -332,7 +330,7 @@
   \label{eq:econ:nds}
   \text{НДС} =
     \frac{ \text{Ц} \cdot \text{Н}_{\text{дс}} }
-	 { \num{100\%} + \text{Н}_\text{дс} } \text{\,,}
+	 { \num{100}\text{\%} + \text{Н}_\text{дс} } \text{\,,}
 \end{equation}
 
 \begin{explanation}
@@ -376,7 +374,7 @@
   \label{eq:econ:profit_level}
 	\text{У}_\text{р} =
 	\frac{\text{П}_\text{ч}}
-	 {\text{З}_\text{р}} \cdot \num{100}{\text{\%}} \text{\,,}
+	 {\text{З}_\text{р}} \cdot \num{100}{\text{\%}} \text{.}
 \end{equation}
 
 Уровень рентабельности составляет
@@ -392,7 +390,7 @@
 
 \subsection{Неэкономический эффект}
 
-Для организации-заказчика данный продукт приводит к получению только неэкономического эффекта.
+Для организации-заказчика данный продукт приводит к получению\break только неэкономического эффекта.
 При использовании данного программного продукта в составе комплекса автоматизации АРМ, с офицеров снимаются задачи по
 обнаружению и настройке подключенных устройств вручную, упрощается процесс тестирования и мониторинга подключенных
 \break
