@@ -8,13 +8,12 @@
 \usepackage{microtype} % better management of overfulls
 
 %\usepackage{mathtools}
-\usepackage{amsfonts}
+%\usepackage{amsfonts}
 % Зачем: Поддержка ажурного и готического шрифтов
 %\usepackage{amsfonts}
 \usepackage{amsmath}
 % Зачем: amsfonts + несколько сотен дополнительных математических символов
-\usepackage{amssymb}
-\usepackage{array}
+%\usepackage{amssymb}
 %\usepackage{unicode-ath}
 
 % Зачем: Удобная вёрстка многострочных формул, масштабирующийся текст в формулах, формулы в рамках и др
@@ -475,6 +474,12 @@
 \newlist{legal}{enumerate}{10}
 \setlist[legal]{font=\bfseries}
 
+\newlist{enum}{enumerate}{10}
+\setlist[enum]{label*=\arabic*.,font=\normalfont}
+
+\setlist[enum,1]{itemindent=\parindent + 2.7ex,leftmargin=0ex}
+\setlist[enum,2]{itemindent=\parindent + \parindent - 2.7ex}
+
 % Установка шрифтов
 \setmainlanguage{russian}
 \setotherlanguage{english}
@@ -486,4 +491,5 @@
 
 % Пакет для создания содержания
 \usepackage[nottoc]{tocbibind} % Don't include ToC line in ToC
-\usepackage{tocloft}
+
+\newcommand{\inchsign}{^{\prime\prime}}
