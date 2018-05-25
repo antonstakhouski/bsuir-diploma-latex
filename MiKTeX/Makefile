@@ -6,8 +6,8 @@ else
 	DROPBOX_PUBLIC=$(HOME)/Dropbox/Public
 endif
 #XELATEX = xelatex
-#XELATEX = lualatex
-XELATEX = pdflatex
+XELATEX = lualatex --shell-escape
+#XELATEX = pdflatex
 DIPLOMA_REPORT_PDF = diploma_report
 PRACTICE_REPORT_PDF = practice_report
 ECONOMICS_REPORT_PDF = economics_report

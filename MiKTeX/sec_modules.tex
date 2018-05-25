@@ -18,7 +18,7 @@
 Данная функция сначала производит формирование групп подключенных устройств.
 
 \medskip
-\begin{lstlisting}[style=qtstyle]
+\begin{minted}{c++}
 m_pTreeDevice->clear();
 
 QList<quint8> groups = getListGroupsDevices();
@@ -49,7 +49,7 @@ for (quint8 i = 0; i < groups.size(); i++) {
 
 	pItemGroup->setHidden(true);
 }
-\end{lstlisting}
+\end{minted}
 \medskip
 
 В начале данного алгоритма происходит получение списка групп\break устройств. После полученные группы добавляются к вершине
@@ -62,7 +62,7 @@ for (quint8 i = 0; i < groups.size(); i++) {
 Процесс прохождения тестирования устройств проходит следующим образом. После нажатия кнопки <<Старт>> срабатывает
 происходит вызов метода \texttt{onStart}, который отвечает за инициализацию процесса тестирования.
 \medskip
-\begin{lstlisting}[style=qtstyle]
+\begin{minted}{c++}
         if (m_bStartTest)
                 return;
         m_bStartTest = true;
@@ -74,14 +74,14 @@ for (quint8 i = 0; i < groups.size(); i++) {
 
         JournalEntry journalEntry;
         QString sRez;
-\end{lstlisting}
+\end{minted}
 \medskip
 
 Данный фрагмент кода служит для деактивации некоторых элементов интерфейса на время тестирования и получения указателя
 на дерево\break устройств. Объект \texttt{JournalEntry} будет использован для хранения данных о результатах тестирования и
 записи их в журнал.
 \medskip
-\begin{lstlisting}[style=qtstyle]
+\begin{minted}{c++}
 while (*it) {
 	sRez = "";
 	QTreeWidgetItem * item = *it;
@@ -107,7 +107,7 @@ while (*it) {
 	quint8 deviceId = item->data(1, Qt::UserRole).toUInt();
 
 	quint8 rez = 0;
-\end{lstlisting}
+\end{minted}
 \medskip
 
 Процесс обхода дерева устройств происходит внутри цикла. Устройства, проверка которых не требуется, группы устройств,
@@ -116,7 +116,7 @@ while (*it) {
 статусе процесса тестирования. Для предотвращения частого измененения элементов графического интерфейса добавлена
 небольшая задержка. Также происходит получение информации о выбранном устройстве и соответствующей ему группе.
 \medskip
-\begin{lstlisting}[style=qtstyle]
+\begin{minted}{c++}
 switch (deviceId)
 {
 	case 16:
@@ -154,7 +154,7 @@ switch (deviceId)
 	default:
 			break;
 }
-\end{lstlisting}
+\end{minted}
 \medskip
 
 Для каждого устройства используется соответвующий объект для проведения тестирования. Метод \texttt{test} отвечает
@@ -172,17 +172,17 @@ switch (deviceId)
 При создании объекта вызывается конструктор, который проводит инициализацию флагов получения сообщений и привязывает
 метод для обработки данных сокета к сигналу наличия данных в сокете.
 \medskip
-\begin{lstlisting}[style=qtstyle]
+\begin{minted}{c++}
 m_bReceiveMess01 = false;
 m_bReceiveMess81 = false;
 connect(&m_sockReceive, SIGNAL(readyRead()), SLOT(onReadFromSocket()));
-\end{lstlisting}
+\end{minted}
 \medskip
 
 Метод \texttt{test} отвечает за управление процессом тестирования БИНС. Метод начинает работу с проверки настроек и
 параметров подключенного устройства. В ходе проверки вся полученная информация заносится в журнал.
 \medskip
-\begin{lstlisting}[style=qtstyle]
+\begin{minted}{c++}
 sRez.clear();
 
 sRez = "<b>" + getNameDevice(ID_DEVICE_BINS3) + "</b>";
@@ -192,10 +192,10 @@ _SETT_ARM sett;
 if (!getSettARM(sett))
 {
 	sRez += CR;
-	sRez += tr("INS settings were not defined!");
+	sRez += tr("Не заданы настройки подключения INS!");
 	return 10;
 }
-\end{lstlisting}
+\end{minted}
 \medskip
 
 Остальные настройки и параметры, такие как параметры подключения устройства, IP адрес, проверяются аналогичным образом.
@@ -203,20 +203,20 @@ if (!getSettARM(sett))
 При удачном подключении БИНС после проверки состояния устройства программа начинает считывать и анализировать полученные
 данные, для ожидания окончания сбора необходимых пакетов используется\break \texttt{QEventLoop}.
 \medskip
-\begin{lstlisting}[style=qtstyle]
+\begin{minted}{c++}
 QEventLoop ev;
 
 QTimer::singleShot(5000, &ev, SLOT(quit()));
 connect(this, SIGNAL(signGetAllMessFromBINS()), &ev, SLOT(quit()));
 ev.exec();
-\end{lstlisting}
+\end{minted}
 \medskip
 
 Далее полученные дейтаграммы анализируются в методах\break \texttt{decodeMes01} и \texttt{decodeMes81}.
 
 Метод \texttt{onReadFromBINS} проводит разбиение полученных\break дейтаграмм на сообщения и анализ данных сообщений.
 \medskip
-\begin{lstlisting}[style=qtstyle]
+\begin{minted}{c++}
 static QByteArray baRemain;
 QByteArray baData = baRemain + datagram;
 QList<QByteArray> listMess = Protocol_BINS3::unpackMess(baData, baRemain);
@@ -244,7 +244,7 @@ for (quint32 i = 0; i < listMess.size(); i++)
 		break;
 	}
 }
-\end{lstlisting}
+\end{minted}
 \medskip
 
 Данный метод производит разбиение полученной дейтаграммы\break \texttt{datagram} на сообщения и формирует список сообщений.

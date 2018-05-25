@@ -1,0 +1,5 @@
+\begin{Verbatim}[commandchars=\\\{\}]
+\PYG{n}{m\PYGZus{}bReceiveMess01} \PYG{o}{=} \PYG{n+nb}{false}\PYG{p}{;}
+\PYG{n}{m\PYGZus{}bReceiveMess81} \PYG{o}{=} \PYG{n+nb}{false}\PYG{p}{;}
+\PYG{n}{connect}\PYG{p}{(}\PYG{o}{\PYGZam{}}\PYG{n}{m\PYGZus{}sockReceive}\PYG{p}{,} \PYG{n}{SIGNAL}\PYG{p}{(}\PYG{n}{readyRead}\PYG{p}{()),} \PYG{n}{SLOT}\PYG{p}{(}\PYG{n}{onReadFromSocket}\PYG{p}{()));}
+\end{Verbatim}

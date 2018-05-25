@@ -3,31 +3,14 @@
 % Примечание: параметр draft помечает строки, вышедшие за границы страницы, прямоугольником, в фильной версии его нужно удалить.
 \documentclass[a4paper,14pt,russian,oneside,final]{extreport}
 
-% Зачем: Настройка Times New Roman.
-% Рекомендовано для Windows (нужен PSCyr, подробности см. в fonts_windows.tex)
-% раскомментировать, чтобы использовать:
-\input{fonts_windows}% не забудьте закомментировать \input{fonts_linux}
-
-% Рекомендовано для Linux (нужен scalable-cyrfonts-tex, подробности см. в fonts_linux.tex)
-% раскомментировать, чтобы использовать:
-%\input{fonts_linux}% не забудьте закомментировать \input{fonts_windows}
-
-% Зачем: Установка кодировки исходных файлов.
-\usepackage[utf8]{inputenc}
-
-% Зачем: Делает результирующий PDF "searchable and copyable".
-\usepackage{cmap}
+% Для мультиязыковой поддержки
+\usepackage{polyglossia}
 
 % Зачем: Чтобы можно было использовать русские буквы в формулах, но в случае использования предупреждать об этом.
 \usepackage[warn]{mathtext}
 
 % Зачем: Учет особенностей различных языков.
-\usepackage[russian]{babel}
-
-% Зачем: Добавляет поддержу дополнительных размеров текста 8pt, 9pt, 10pt, 11pt, 12pt, 14pt, 17pt, and 20pt.
-% Почему: Пункт 2.1.1 Требований по оформлению пояснительной записки.
-\usepackage{extsizes}
-
+\usepackage{babel}
 
 % Зачем: Длинна, пимерно соответвующая 5 символам
 % Почему: Требования содержат странное требование про отсупы в 5 символов (для немоноширинного шрифта :| )
@@ -51,12 +34,6 @@
 \usepackage[nodisplayskipstretch]{setspace}
 \setstretch{1.0}
 %\onehalfspacing
-
-% Зачем: Выбор шрифта по-умолчанию.
-% Почему: Пункт 2.1.1 Требований по оформлению пояснительной записки.
-% Примечание: В требованиях не указан, какой именно шрифт использовать. По традиции используем TNR.
-\renewcommand{\rmdefault}{ftm} % Times New Roman
-
 
 % Зачем: Отключает использование изменяемых межсловных пробелов.
 % Почему: Так не принято делать в текстах на русском языке.
@@ -483,10 +460,6 @@
    \fi
 }
 
-\usepackage{courier}
-\let\OldTexttt\texttt
-\renewcommand{\texttt}[1]{\OldTexttt{\fontencoding{T1}\ttfamily{#1}}}
-
 % Нумерованный список с арабскими цифрами на всех уровнях нумерации
 \newlist{legal}{enumerate}{10}
 \setlist[legal]{font=\bfseries}
@@ -503,3 +476,29 @@
    breaklines=true,
    tabsize=4
 }
+
+% Установка язков
+\setdefaultlanguage{russian}
+\setmainlanguage{russian}
+\setotherlanguage{english}
+
+% Лигатуры нужны для правильного отображения тире, кавычек и прочего
+\setmainfont[Ligatures=TeX]{Times New Roman}
+\setmonofont[Ligatures=TeX]{Courier New}
+
+% Необходимо для киррилических шрифтов
+\newfontfamily{\cyrillicfont}[Ligatures=TeX]{Times New Roman}
+\newfontfamily{\cyrillicfonttt}[Ligatures=TeX]{Courier New}
+
+% Удаляет точки после нумерации section и прочих
+\AtBeginDocument{%
+   \def\postsection{\@aftersepkern}%
+   \def\postsubsection{\@aftersepkern}%
+   \def\postsubsubsection{\@aftersepkern}%
+   \def\postparagraph{\@aftersepkern}%
+   \def\postsubparagraph{\@aftersepkern}%
+}
+
+\usepackage{minted}
+
+\setminted[c++]{fontfamily=tt,fontsize=\small,xleftmargin=1.25cm,breaklines=true}

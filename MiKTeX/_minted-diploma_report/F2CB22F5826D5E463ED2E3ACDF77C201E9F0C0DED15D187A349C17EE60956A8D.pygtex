@@ -1,0 +1,7 @@
+\begin{Verbatim}[commandchars=\\\{\}]
+\PYG{n}{QEventLoop} \PYG{n}{ev}\PYG{p}{;}
+
+\PYG{n}{QTimer}\PYG{o}{::}\PYG{n}{singleShot}\PYG{p}{(}\PYG{l+m+mi}{5000}\PYG{p}{,} \PYG{o}{\PYGZam{}}\PYG{n}{ev}\PYG{p}{,} \PYG{n}{SLOT}\PYG{p}{(}\PYG{n}{quit}\PYG{p}{()));}
+\PYG{n}{connect}\PYG{p}{(}\PYG{k}{this}\PYG{p}{,} \PYG{n}{SIGNAL}\PYG{p}{(}\PYG{n}{signGetAllMessFromBINS}\PYG{p}{()),} \PYG{o}{\PYGZam{}}\PYG{n}{ev}\PYG{p}{,} \PYG{n}{SLOT}\PYG{p}{(}\PYG{n}{quit}\PYG{p}{()));}
+\PYG{n}{ev}\PYG{p}{.}\PYG{n}{exec}\PYG{p}{();}
+\end{Verbatim}

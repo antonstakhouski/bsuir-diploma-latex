@@ -1,0 +1,27 @@
+\begin{Verbatim}[commandchars=\\\{\}]
+\PYG{k}{while} \PYG{p}{(}\PYG{o}{*}\PYG{n}{it}\PYG{p}{)} \PYG{p}{\PYGZob{}}
+	\PYG{n}{sRez} \PYG{o}{=} \PYG{l+s}{\PYGZdq{}\PYGZdq{}}\PYG{p}{;}
+	\PYG{n}{QTreeWidgetItem} \PYG{o}{*} \PYG{n}{item} \PYG{o}{=} \PYG{o}{*}\PYG{n}{it}\PYG{p}{;}
+	\PYG{k}{if} \PYG{p}{((}\PYG{n}{item}\PYG{o}{\PYGZhy{}\PYGZgt{}}\PYG{n}{checkState}\PYG{p}{(}\PYG{l+m+mi}{0}\PYG{p}{)} \PYG{o}{!=} \PYG{n}{Qt}\PYG{o}{::}\PYG{n}{Checked}\PYG{p}{)} \PYG{o}{||} \PYG{n}{item}\PYG{o}{\PYGZhy{}\PYGZgt{}}\PYG{n}{childCount}\PYG{p}{()} \PYG{o}{||} \PYG{n}{item}\PYG{o}{\PYGZhy{}\PYGZgt{}}\PYG{n}{isHidden}\PYG{p}{())}
+	\PYG{p}{\PYGZob{}}
+		\PYG{o}{++}\PYG{n}{it}\PYG{p}{;}
+		\PYG{k}{continue}\PYG{p}{;}
+	\PYG{p}{\PYGZcb{}}
+
+	\PYG{n}{item}\PYG{o}{\PYGZhy{}\PYGZgt{}}\PYG{n}{setForeground}\PYG{p}{(}\PYG{l+m+mi}{1}\PYG{p}{,} \PYG{n}{QBrush}\PYG{p}{(}\PYG{n}{Qt}\PYG{o}{::}\PYG{n}{black}\PYG{p}{));}
+	\PYG{n}{item}\PYG{o}{\PYGZhy{}\PYGZgt{}}\PYG{n}{setText}\PYG{p}{(}\PYG{l+m+mi}{1}\PYG{p}{,} \PYG{n}{ID\PYGZus{}FUNC\PYGZus{}FONE\PYGZus{}2} \PYG{o}{+} \PYG{l+s}{\PYGZdq{}...\PYGZdq{}}\PYG{p}{);}
+
+	\PYG{n}{quint32} \PYG{n}{idItem} \PYG{o}{=} \PYG{n}{item}\PYG{o}{\PYGZhy{}\PYGZgt{}}\PYG{n}{data}\PYG{p}{(}\PYG{l+m+mi}{1}\PYG{p}{,} \PYG{n}{Qt}\PYG{o}{::}\PYG{n}{UserRole}\PYG{p}{).}\PYG{n}{toUInt}\PYG{p}{();}
+
+	\PYG{n}{m\PYGZus{}pTreeDevice}\PYG{o}{\PYGZhy{}\PYGZgt{}}\PYG{n}{clearSelections}\PYG{p}{();}
+	\PYG{n}{m\PYGZus{}pTreeDevice}\PYG{o}{\PYGZhy{}\PYGZgt{}}\PYG{n}{selectItemById}\PYG{p}{(}\PYG{n}{idItem}\PYG{p}{,} \PYG{n+nb}{true}\PYG{p}{);}
+
+	\PYG{n}{QTest}\PYG{o}{::}\PYG{n}{qWait}\PYG{p}{(}\PYG{l+m+mi}{500}\PYG{p}{);}
+
+	\PYG{n}{QString} \PYG{n}{sNameDevise} \PYG{o}{=} \PYG{n}{item}\PYG{o}{\PYGZhy{}\PYGZgt{}}\PYG{n}{text}\PYG{p}{(}\PYG{l+m+mi}{0}\PYG{p}{);}
+	\PYG{n}{QString} \PYG{n}{sNameDeviseParent} \PYG{o}{=} \PYG{n}{item}\PYG{o}{\PYGZhy{}\PYGZgt{}}\PYG{n}{text}\PYG{p}{(}\PYG{l+m+mi}{0}\PYG{p}{);}
+
+	\PYG{n}{quint8} \PYG{n}{deviceId} \PYG{o}{=} \PYG{n}{item}\PYG{o}{\PYGZhy{}\PYGZgt{}}\PYG{n}{data}\PYG{p}{(}\PYG{l+m+mi}{1}\PYG{p}{,} \PYG{n}{Qt}\PYG{o}{::}\PYG{n}{UserRole}\PYG{p}{).}\PYG{n}{toUInt}\PYG{p}{();}
+
+	\PYG{n}{quint8} \PYG{n}{rez} \PYG{o}{=} \PYG{l+m+mi}{0}\PYG{p}{;}
+\end{Verbatim}
