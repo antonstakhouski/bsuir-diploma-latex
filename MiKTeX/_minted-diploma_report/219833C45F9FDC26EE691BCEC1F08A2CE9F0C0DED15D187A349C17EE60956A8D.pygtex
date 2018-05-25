@@ -1,0 +1,14 @@
+\begin{Verbatim}[commandchars=\\\{\}]
+\PYG{n}{sRez}\PYG{p}{.}\PYG{n}{clear}\PYG{p}{();}
+
+\PYG{n}{sRez} \PYG{o}{=} \PYG{l+s}{\PYGZdq{}\PYGZlt{}b\PYGZgt{}\PYGZdq{}} \PYG{o}{+} \PYG{n}{getNameDevice}\PYG{p}{(}\PYG{n}{ID\PYGZus{}DEVICE\PYGZus{}BINS3}\PYG{p}{)} \PYG{o}{+} \PYG{l+s}{\PYGZdq{}\PYGZlt{}/b\PYGZgt{}\PYGZdq{}}\PYG{p}{;}
+\PYG{n}{sRez} \PYG{o}{+=} \PYG{n}{CR}\PYG{p}{;}
+
+\PYG{n}{\PYGZus{}SETT\PYGZus{}ARM} \PYG{n}{sett}\PYG{p}{;}
+\PYG{k}{if} \PYG{p}{(}\PYG{o}{!}\PYG{n}{getSettARM}\PYG{p}{(}\PYG{n}{sett}\PYG{p}{))}
+\PYG{p}{\PYGZob{}}
+	\PYG{n}{sRez} \PYG{o}{+=} \PYG{n}{CR}\PYG{p}{;}
+	\PYG{n}{sRez} \PYG{o}{+=} \PYG{n}{tr}\PYG{p}{(}\PYG{l+s}{\PYGZdq{}Не заданы настройки подключения INS!\PYGZdq{}}\PYG{p}{);}
+	\PYG{k}{return} \PYG{l+m+mi}{10}\PYG{p}{;}
+\PYG{p}{\PYGZcb{}}
+\end{Verbatim}

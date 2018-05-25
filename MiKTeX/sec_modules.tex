@@ -1,0 +1,259 @@
+\section{РАЗРАБОТКА ПРОГРАММНЫХ МОДУЛЕЙ}
+\label{sec:modules}
+
+При разработке данного программного обеспечения было необходимо реализовать возможность настройки и тестирования
+набора устройств. С учетом дальнейшей возможности расширения списка устройств, с которыми должно работать разработанное
+ПО, была выбрана модульная архитектура приложения. Разработанные модули были спроектированы максимально независимыми.
+Также интерфейс модулей, отвечающих за тестирование устройств максимально унифицирован. Фукнции настройки устройств были
+вынесены в отдельные программы для лучшего абстрагирования модулей системы. Все вышеописанные решения
+позволили спроектировать легко расширяемую систему.
+
+Ниже будет приведено описание нескольких наиболее важных алгоритмов системы.
+
+\subsection{Управляющий модуль}
+Данный модуль управляет процессом тестирования всех подключенных устройств, поэтому рассмотрение работы данного модуля
+представляет особый интерес.
+Работа модуля начинается с составления дерева подключенных устройств. Для этого используется функция
+\texttt{loadDevices}, которая вызывается в процессе работы конструктора объекта класса\break \texttt{OfflineFuncControl}.
+Данная функция сначала производит формирование групп подключенных устройств.
+
+\medskip
+\begin{lstlisting}[style=qtstyle]
+m_pTreeDevice->clear();
+
+QList<quint8> groups = getListGroupsDevices();
+QHash<quint8, QTreeWidgetItem*> groupWidgetHash;
+
+for (quint8 i = 0; i < groups.size(); i++) {
+
+	QTreeWidgetItem* pItemGroup = new QTreeWidgetItem(m_pTreeDevice);
+	quint8 groupId = groups[i];
+	groupWidgetHash.insert(groupId, pItemGroup);
+	QString groupName = getNameGroupDevice( groups[i] );
+
+	QFont f = pItemGroup->font(0);
+	f.setBold(true);
+	pItemGroup->setFont(0, f);
+	pItemGroup->setText(0, groupName);
+	pItemGroup->setSizeHint(0, QSize(0, 32));
+	m_pTreeDevice->insertTopLevelItem(0, pItemGroup);
+	pItemGroup->setExpanded(true);
+	Qt::ItemFlags flags = pItemGroup->flags();
+	flags |= Qt::ItemIsUserCheckable;
+
+	pItemGroup->setFlags(flags);
+	pItemGroup->setCheckState(0, Qt::Checked);
+	pItemGroup->setData(0, Qt::UserRole, Qt::Checked);
+	pItemGroup->setData(1, Qt::UserRole, 0);
+
+
+	pItemGroup->setHidden(true);
+}
+\end{lstlisting}
+\medskip
+
+В начале данного алгоритма происходит получение списка групп\break устройств. После полученные группы добавляются к вершине
+дерева\break устройств, происходит настройка соответствующим группам элементам интерфейса.
+
+После добавление групп в дерево устройств проводится добавление подключенных устройств в группы.
+Согласно алгоритмам, схожим с приведенным в листинге, проиводится поиск сетевых и
+периферийных устройств.
+
+Процесс прохождения тестирования устройств проходит следующим образом. После нажатия кнопки <<Старт>> срабатывает
+происходит вызов метода \texttt{onStart}, который отвечает за инициализацию процесса тестирования.
+\medskip
+\begin{lstlisting}[style=qtstyle]
+        if (m_bStartTest)
+                return;
+        m_bStartTest = true;
+        m_pBtStart->setEnabled(false);
+        m_pBtPrint->setEnabled(false);
+        m_pBtSettings->setEnabled(false);
+        m_pBtJournal->setEnabled(false);
+        QTreeWidgetItemIterator it(m_pTreeDevice);
+
+        JournalEntry journalEntry;
+        QString sRez;
+\end{lstlisting}
+\medskip
+
+Данный фрагмент кода служит для деактивации некоторых элементов интерфейса на время тестирования и получения указателя
+на дерево\break устройств. Объект \texttt{JournalEntry} будет использован для хранения данных о результатах тестирования и
+записи их в журнал.
+\medskip
+\begin{lstlisting}[style=qtstyle]
+while (*it) {
+	sRez = "";
+	QTreeWidgetItem * item = *it;
+	if ((item->checkState(0) != Qt::Checked) || item->childCount() || item->isHidden())
+	{
+		++it;
+		continue;
+	}
+
+	item->setForeground(1, QBrush(Qt::black));
+	item->setText(1, ID_FUNC_FONE_2 + "...");
+
+	quint32 idItem = item->data(1, Qt::UserRole).toUInt();
+
+	m_pTreeDevice->clearSelections();
+	m_pTreeDevice->selectItemById(idItem, true);
+
+	QTest::qWait(500);
+
+	QString sNameDevise = item->text(0);
+	QString sNameDeviseParent = item->text(0);
+
+	quint8 deviceId = item->data(1, Qt::UserRole).toUInt();
+
+	quint8 rez = 0;
+\end{lstlisting}
+\medskip
+
+Процесс обхода дерева устройств происходит внутри цикла. Устройства, проверка которых не требуется, группы устройств,
+спрятанные устройства  не участвуют в процессе тестирования. Далее происходит изменение элементов графического
+интерфейса, соответствующих устройству, которое проходит тестирование в данный момент, для информирования пользователя о
+статусе процесса тестирования. Для предотвращения частого измененения элементов графического интерфейса добавлена
+небольшая задержка. Также происходит получение информации о выбранном устройстве и соответствующей ему группе.
+\medskip
+\begin{lstlisting}[style=qtstyle]
+switch (deviceId)
+{
+	case 16:
+		{
+			VTest_R181 test(this);
+			rez = test.test(deviceId, sRez);
+			break;
+		}
+	case 11:
+		{
+			VTest_MeteoWXT520 test(this);
+			rez = test.test(sRez);
+			break;
+
+		}
+	case 12:
+		{
+			VTest_BINS3 test(this);
+			rez = test.test(sRez);
+			break;
+
+		}
+	case 17:
+		{
+			VTest_GPS test(this);
+			rez = test.test(sRez);
+			break;
+		}
+	case 18:
+		{
+			QTestPrinter test(this);
+			rez = test.test(sRez);
+			break;
+		}
+	default:
+			break;
+}
+\end{lstlisting}
+\medskip
+
+Для каждого устройства используется соответвующий объект для проведения тестирования. Метод \texttt{test} отвечает
+непосредственно за тестирование выбранного устройства. Результат тестирования сохраняется в переменную \texttt{rez}.
+Данное значение будет использоваться в дальнейшем при формировании результатов тестирования.
+
+Далее происходит вывод соответствующей резутьтатам тестирования устройства информации на экран и добавление результатов
+тестирования в запись. После этого цикл повторяется для следующего устройства. После прохождения тестирования всеми
+устройствами происходит сохранение результатов тестирования в журнал и возобновление доступности кнопок приложения.
+
+\subsection{Модуль тестирования БИНС}
+Данный модуль осуществляет тестирование БИНС. Проводится проверка подключения БИНС, происходит считывание и анализ
+сообщений статуса и навигационных сообщений БИНС. Рассмотрим данный алгоритм подробнее.
+
+При создании объекта вызывается конструктор, который проводит инициализацию флагов получения сообщений и привязывает
+метод для обработки данных сокета к сигналу наличия данных в сокете.
+\medskip
+\begin{lstlisting}[style=qtstyle]
+m_bReceiveMess01 = false;
+m_bReceiveMess81 = false;
+connect(&m_sockReceive, SIGNAL(readyRead()), SLOT(onReadFromSocket()));
+\end{lstlisting}
+\medskip
+
+Метод \texttt{test} отвечает за управление процессом тестирования БИНС. Метод начинает работу с проверки настроек и
+параметров подключенного устройства. В ходе проверки вся полученная информация заносится в журнал.
+\medskip
+\begin{lstlisting}[style=qtstyle]
+sRez.clear();
+
+sRez = "<b>" + getNameDevice(ID_DEVICE_BINS3) + "</b>";
+sRez += CR;
+
+_SETT_ARM sett;
+if (!getSettARM(sett))
+{
+	sRez += CR;
+	sRez += tr("INS settings were not defined!");
+	return 10;
+}
+\end{lstlisting}
+\medskip
+
+Остальные настройки и параметры, такие как параметры подключения устройства, IP адрес, проверяются аналогичным образом.
+
+При удачном подключении БИНС после проверки состояния устройства программа начинает считывать и анализировать полученные
+данные, для ожидания окончания сбора необходимых пакетов используется\break \texttt{QEventLoop}.
+\medskip
+\begin{lstlisting}[style=qtstyle]
+QEventLoop ev;
+
+QTimer::singleShot(5000, &ev, SLOT(quit()));
+connect(this, SIGNAL(signGetAllMessFromBINS()), &ev, SLOT(quit()));
+ev.exec();
+\end{lstlisting}
+\medskip
+
+Далее полученные дейтаграммы анализируются в методах\break \texttt{decodeMes01} и \texttt{decodeMes81}.
+
+Метод \texttt{onReadFromBINS} проводит разбиение полученных\break дейтаграмм на сообщения и анализ данных сообщений.
+\medskip
+\begin{lstlisting}[style=qtstyle]
+static QByteArray baRemain;
+QByteArray baData = baRemain + datagram;
+QList<QByteArray> listMess = Protocol_BINS3::unpackMess(baData, baRemain);
+
+for (quint32 i = 0; i < listMess.size(); i++)
+{
+	QByteArray baKdg = listMess.at(i);
+	Protocol_BINS3::_KDG kdg = Protocol_BINS3::unpackKDG(baKdg);
+
+	if (kdg.typeKDG == Protocol_BINS3::MESS_01)
+	{
+		m_mes01 = kdg.kdg01;
+		m_bReceiveMess01 = true;
+	}
+	else if (kdg.typeKDG == Protocol_BINS3::MESS_81)
+	{
+		m_mes81 = kdg.kdg81;
+		m_bReceiveMess81 = true;
+	}
+
+
+	if (m_bReceiveMess01 && m_bReceiveMess81)
+	{
+		emit signGetAllMessFromBINS();
+		break;
+	}
+}
+\end{lstlisting}
+\medskip
+
+Данный метод производит разбиение полученной дейтаграммы\break \texttt{datagram} на сообщения и формирует список сообщений.
+Далее происходит анализ полученных сообщений. Полученное сообщение инкапсулируется в структуру \texttt{kdg} для удобства
+доступа к полям сообщения.
+
+Происходит анализ типа полученных сообщений. При полученнии сообщения с навигационными данными или сообщения с
+информацией о статусе устройства происходит установка соответствующего флага и инкапсуляция заголовка сообщения в
+соответствующую структуру, используемую при дальнейшем анализе. При получении сообщений двух типов происходит генерация
+сигнала \texttt{signGetAllMessFromBINS}. Данный сигнал прерывает \texttt{QEventLoop}.
+
+

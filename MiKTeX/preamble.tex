@@ -483,10 +483,9 @@
    \fi
 }
 
+\usepackage{courier}
 \let\OldTexttt\texttt
 \renewcommand{\texttt}[1]{\OldTexttt{\fontencoding{T1}\ttfamily{#1}}}
-
-\usepackage{courier}
 
 % Нумерованный список с арабскими цифрами на всех уровнях нумерации
 \newlist{legal}{enumerate}{10}
@@ -498,18 +497,9 @@
 \setlist[enum,1]{itemindent=\parindent + 2.7ex,leftmargin=0ex}
 \setlist[enum,2]{itemindent=\parindent + \parindent - 2.7ex}
 
-
-%\usepackage{courier}
-%\setmonofont{Courier New}
-
-%\usepackage{titlesec}
-%\titlespacing{\chapter}{0pt}{0pt}{4pt}
-
-%\titleformat{\section}
-    %{\normalfont\normalsize}
-    %{\thesection}{1em}{\MakeUppercase}
-
-%\titleformat{\subsection}
-    %{\normalfont\normalsize}
-    %{\thesubsection}{1em}{}
-
+\lstdefinestyle{qtstyle}{
+   xleftmargin=1.25cm,
+   basicstyle=\fontencoding{T1}\small\ttfamily,
+   breaklines=true,
+   tabsize=4
+}
