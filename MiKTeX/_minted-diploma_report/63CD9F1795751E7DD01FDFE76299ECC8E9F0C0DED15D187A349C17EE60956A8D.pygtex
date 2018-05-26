@@ -1,0 +1,45 @@
+\begin{Verbatim}[commandchars=\\\{\}]
+\PYG{n}{quint8} \PYG{n}{QTestARM}\PYG{o}{::}\PYG{n}{test}\PYG{p}{(}\PYG{n}{quint8} \PYG{n}{idDevice}\PYG{p}{,} \PYG{n}{QString} \PYG{o}{\PYGZam{}} \PYG{n}{sRez}\PYG{p}{)} \PYG{p}{\PYGZob{}}
+
+	\PYG{n}{\PYGZus{}SETT\PYGZus{}ARM} \PYG{n}{sett}\PYG{p}{;}
+	\PYG{k}{if} \PYG{p}{(}\PYG{o}{!}\PYG{n}{getSettARM}\PYG{p}{(}\PYG{n}{sett}\PYG{p}{))}
+		\PYG{k}{return} \PYG{l+m+mi}{10}\PYG{p}{;}
+
+	\PYG{n}{\PYGZus{}IP\PYGZus{}DEVICE} \PYG{n}{device} \PYG{o}{=} \PYG{n}{sett}\PYG{p}{.}\PYG{n}{shemeLAN}\PYG{p}{.}\PYG{n}{value}\PYG{p}{(}\PYG{n}{idDevice}\PYG{p}{);}
+
+	\PYG{k}{if} \PYG{p}{(}\PYG{o}{!}\PYG{n}{device}\PYG{p}{.}\PYG{n}{idDevice}\PYG{p}{)}
+		\PYG{k}{return} \PYG{l+m+mi}{10}\PYG{p}{;}
+
+	\PYG{n}{sRez} \PYG{o}{+=} \PYG{n}{getNameDevice}\PYG{p}{(}\PYG{n}{device}\PYG{p}{.}\PYG{n}{idDevice}\PYG{p}{);}
+
+	\PYG{k}{if} \PYG{p}{(}\PYG{o}{!}\PYG{n}{device}\PYG{p}{.}\PYG{n}{hashIP}\PYG{p}{.}\PYG{n}{size}\PYG{p}{())}
+	\PYG{p}{\PYGZob{}}
+		\PYG{n}{sRez} \PYG{o}{+=} \PYG{n}{CR}\PYG{p}{;}
+		\PYG{n}{sRez} \PYG{o}{+=} \PYG{n}{tr}\PYG{p}{(}\PYG{l+s}{\PYGZdq{}Для устройства не заданы интерфейсы подключения к локальной сети!\PYGZdq{}}\PYG{p}{);}
+		\PYG{k}{return} \PYG{l+m+mi}{10}\PYG{p}{;}
+	\PYG{p}{\PYGZcb{}}
+
+	\PYG{n}{QHashIterator}\PYG{o}{\PYGZlt{}}\PYG{n}{QString}\PYG{p}{,} \PYG{n}{QString}\PYG{o}{\PYGZgt{}} \PYG{n}{it}\PYG{p}{(}\PYG{n}{device}\PYG{p}{.}\PYG{n}{hashIP}\PYG{p}{);}
+
+	\PYG{n}{quint8} \PYG{n}{rez} \PYG{o}{=} \PYG{l+m+mi}{0}\PYG{p}{;}
+	\PYG{k}{while} \PYG{p}{(}\PYG{n}{it}\PYG{p}{.}\PYG{n}{hasNext}\PYG{p}{())}
+	\PYG{p}{\PYGZob{}}
+		\PYG{n}{it}\PYG{p}{.}\PYG{n}{next}\PYG{p}{();}
+		\PYG{n}{QString} \PYG{n}{sLan} \PYG{o}{=} \PYG{n}{it}\PYG{p}{.}\PYG{n}{key}\PYG{p}{();}
+		\PYG{n}{QString} \PYG{n}{sIP} \PYG{o}{=} \PYG{n}{it}\PYG{p}{.}\PYG{n}{value}\PYG{p}{();}
+
+		\PYG{n}{sRez} \PYG{o}{+=} \PYG{n}{CR}\PYG{p}{;}
+		\PYG{n}{sRez} \PYG{o}{+=} \PYG{n}{QString}\PYG{p}{(}\PYG{l+s}{\PYGZdq{}\PYGZpc{}1 (\PYGZpc{}2): \PYGZdq{}}\PYG{p}{).}\PYG{n}{arg}\PYG{p}{(}\PYG{n}{sLan}\PYG{p}{).}\PYG{n}{arg}\PYG{p}{(}\PYG{n}{sIP}\PYG{p}{);}
+		\PYG{n}{sRez} \PYG{o}{+=} \PYG{n}{CR}\PYG{p}{;}
+
+		\PYG{n}{quint8} \PYG{n}{rez1} \PYG{o}{=} \PYG{n}{ping}\PYG{p}{(}\PYG{n}{sIP}\PYG{p}{,} \PYG{n}{sRez}\PYG{p}{);}
+
+		\PYG{k}{if} \PYG{p}{(}\PYG{n}{rez1}\PYG{p}{)}
+			\PYG{n}{rez} \PYG{o}{=} \PYG{n}{rez1}\PYG{p}{;}
+
+	\PYG{p}{\PYGZcb{}}
+
+	\PYG{k}{return} \PYG{n}{rez}\PYG{p}{;}
+
+\PYG{p}{\PYGZcb{}}
+\end{Verbatim}

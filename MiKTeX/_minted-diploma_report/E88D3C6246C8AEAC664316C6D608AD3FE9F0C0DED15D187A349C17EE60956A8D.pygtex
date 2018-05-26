@@ -1,0 +1,24 @@
+\begin{Verbatim}[commandchars=\\\{\}]
+\PYG{n}{QPrinter} \PYG{n+nf}{printer}\PYG{p}{(}\PYG{n}{QPrinter}\PYG{o}{::}\PYG{n}{HighResolution}\PYG{p}{);}
+\PYG{n}{printer}\PYG{p}{.}\PYG{n}{setOrientation}\PYG{p}{(}\PYG{n}{QPrinter}\PYG{o}{::}\PYG{n}{Portrait}\PYG{p}{);}
+\PYG{n}{printer}\PYG{p}{.}\PYG{n}{setDocName} \PYG{p}{(}\PYG{n}{ID\PYGZus{}FUNC9}\PYG{p}{);}
+\PYG{n}{QWidget} \PYG{o}{*} \PYG{n}{widg} \PYG{o}{=} \PYG{n}{qobject\PYGZus{}cast}\PYG{o}{\PYGZlt{}}\PYG{n}{QWidget} \PYG{o}{*\PYGZgt{}}\PYG{p}{(}\PYG{n}{parent}\PYG{p}{());}
+
+\PYG{n}{QPrintPreviewDialog} \PYG{n+nf}{dlgPreview}\PYG{p}{(}\PYG{o}{\PYGZam{}}\PYG{n}{printer}\PYG{p}{,} \PYG{n}{widg}\PYG{p}{);}
+\PYG{n}{connect}\PYG{p}{(}\PYG{o}{\PYGZam{}}\PYG{n}{dlgPreview}\PYG{p}{,} \PYG{n}{SIGNAL}\PYG{p}{(}\PYG{n}{paintRequested}\PYG{p}{(}\PYG{n}{QPrinter} \PYG{o}{*} \PYG{p}{)),} \PYG{k}{this}\PYG{p}{,} \PYG{n}{SLOT}\PYG{p}{(}\PYG{n}{print}\PYG{p}{(}\PYG{n}{QPrinter} \PYG{o}{*}\PYG{p}{)));}
+\PYG{n}{dlgPreview}\PYG{p}{.}\PYG{n}{resize}\PYG{p}{(}\PYG{l+m+mi}{800}\PYG{p}{,} \PYG{l+m+mi}{800}\PYG{p}{);}
+\PYG{n}{dlgPreview}\PYG{p}{.}\PYG{n}{show}\PYG{p}{();}
+\PYG{n}{dlgPreview}\PYG{p}{.}\PYG{n}{exec}\PYG{p}{();}
+
+\PYG{k}{if} \PYG{p}{(}\PYG{n}{QMessageBox}\PYG{o}{::}\PYG{n}{question}\PYG{p}{(}\PYG{l+m+mi}{0}\PYG{p}{,} \PYG{n}{ID\PYGZus{}FUNC9}\PYG{p}{,} \PYG{n}{ID\PYGZus{}FUNC24}\PYG{p}{,} \PYG{n}{QMessageBox}\PYG{o}{::}\PYG{n}{Yes}\PYG{p}{,} \PYG{n}{QMessageBox}\PYG{o}{::}\PYG{n}{No}\PYG{p}{)} \PYG{o}{==} \PYG{n}{QMessageBox}\PYG{o}{::}\PYG{n}{Yes}\PYG{p}{)}
+\PYG{p}{\PYGZob{}}
+	\PYG{n}{sRez} \PYG{o}{+=} \PYG{n}{CR}\PYG{p}{;}
+	\PYG{n}{sRez} \PYG{o}{+=} \PYG{n}{tr}\PYG{p}{(}\PYG{l+s}{\PYGZdq{}Тестовая страница напечатана корректно!\PYGZdq{}}\PYG{p}{);}
+	\PYG{k}{return} \PYG{l+m+mi}{0}\PYG{p}{;}
+\PYG{p}{\PYGZcb{}}
+
+\PYG{n}{sRez} \PYG{o}{+=} \PYG{n}{CR}\PYG{p}{;}
+\PYG{n}{sRez} \PYG{o}{+=} \PYG{n}{tr}\PYG{p}{(}\PYG{l+s}{\PYGZdq{}Тестовая страница напечатана некорректно!\PYGZdq{}}\PYG{p}{);}
+
+\PYG{k}{return} \PYG{l+m+mi}{1}\PYG{p}{;}
+\end{Verbatim}

@@ -4,7 +4,7 @@
 При разработке данного программного обеспечения было необходимо реализовать возможность настройки и тестирования
 набора устройств. С учетом дальнейшей возможности расширения списка устройств, с которыми должно работать разработанное
 ПО, была выбрана модульная архитектура приложения. Разработанные модули были спроектированы максимально независимыми.
-Также интерфейс модулей, отвечающих за тестирование устройств максимально унифицирован. Фукнции настройки устройств были
+Также интерфейс модулей, отвечающих за тестирование устройств максимально унифицирован. Функции настройки устройств были
 вынесены в отдельные программы для лучшего абстрагирования модулей системы. Все вышеописанные решения
 позволили спроектировать легко расширяемую систему.
 
@@ -56,24 +56,24 @@ for (quint8 i = 0; i < groups.size(); i++) {
 дерева\break устройств, происходит настройка соответствующим группам элементам интерфейса.
 
 После добавление групп в дерево устройств проводится добавление подключенных устройств в группы.
-Согласно алгоритмам, схожим с приведенным в листинге, проиводится поиск сетевых и
+Согласно алгоритмам, схожим с приведенным в листинге, производится поиск сетевых и
 периферийных устройств.
 
 Процесс прохождения тестирования устройств проходит следующим образом. После нажатия кнопки <<Старт>> срабатывает
-происходит вызов метода \texttt{onStart}, который отвечает за инициализацию процесса тестирования.
+происходит вызов метода \texttt{onStart}, который отвечает за процесс тестирования.
 \medskip
 \begin{minted}{c++}
-        if (m_bStartTest)
-                return;
-        m_bStartTest = true;
-        m_pBtStart->setEnabled(false);
-        m_pBtPrint->setEnabled(false);
-        m_pBtSettings->setEnabled(false);
-        m_pBtJournal->setEnabled(false);
-        QTreeWidgetItemIterator it(m_pTreeDevice);
+if (m_bStartTest)
+	return;
+m_bStartTest = true;
+m_pBtStart->setEnabled(false);
+m_pBtPrint->setEnabled(false);
+m_pBtSettings->setEnabled(false);
+m_pBtJournal->setEnabled(false);
+QTreeWidgetItemIterator it(m_pTreeDevice);
 
-        JournalEntry journalEntry;
-        QString sRez;
+JournalEntry journalEntry;
+QString sRez;
 \end{minted}
 \medskip
 
@@ -113,7 +113,7 @@ while (*it) {
 Процесс обхода дерева устройств происходит внутри цикла. Устройства, проверка которых не требуется, группы устройств,
 спрятанные устройства  не участвуют в процессе тестирования. Далее происходит изменение элементов графического
 интерфейса, соответствующих устройству, которое проходит тестирование в данный момент, для информирования пользователя о
-статусе процесса тестирования. Для предотвращения частого измененения элементов графического интерфейса добавлена
+статусе процесса тестирования. Для предотвращения частого изменения элементов графического интерфейса добавлена
 небольшая задержка. Также происходит получение информации о выбранном устройстве и соответствующей ему группе.
 \medskip
 \begin{minted}{c++}
@@ -157,11 +157,11 @@ switch (deviceId)
 \end{minted}
 \medskip
 
-Для каждого устройства используется соответвующий объект для проведения тестирования. Метод \texttt{test} отвечает
+Для каждого устройства используется соответствующий объект для проведения тестирования. Метод \texttt{test} отвечает
 непосредственно за тестирование выбранного устройства. Результат тестирования сохраняется в переменную \texttt{rez}.
 Данное значение будет использоваться в дальнейшем при формировании результатов тестирования.
 
-Далее происходит вывод соответствующей резутьтатам тестирования устройства информации на экран и добавление результатов
+Далее происходит вывод соответствующей результатам тестирования устройства информации на экран и добавление результатов
 тестирования в запись. После этого цикл повторяется для следующего устройства. После прохождения тестирования всеми
 устройствами происходит сохранение результатов тестирования в журнал и возобновление доступности кнопок приложения.
 
@@ -251,9 +251,220 @@ for (quint32 i = 0; i < listMess.size(); i++)
 Далее происходит анализ полученных сообщений. Полученное сообщение инкапсулируется в структуру \texttt{kdg} для удобства
 доступа к полям сообщения.
 
-Происходит анализ типа полученных сообщений. При полученнии сообщения с навигационными данными или сообщения с
+Происходит анализ типа полученных сообщений. При получении сообщения с навигационными данными или сообщения с
 информацией о статусе устройства происходит установка соответствующего флага и инкапсуляция заголовка сообщения в
 соответствующую структуру, используемую при дальнейшем анализе. При получении сообщений двух типов происходит генерация
 сигнала \texttt{signGetAllMessFromBINS}. Данный сигнал прерывает \texttt{QEventLoop}.
 
+Методы \texttt{decodeMes81} и \texttt{decodeMes01} служат для анализа сообщений статуса и сообщений с навигационными
+данными соответственно.
+\medskip
+\begin{minted}{c++}
+void VTest_BINS3::decodeMes81(bool & bIspr, QString & sRez)
+{
+bIspr = true;
+sRez += CR;
+sRez += CR;
+sRez += tr("<b>Статус INS:</b>");
 
+sRez += CR;
+
+sRez += tr("Признак калибровки ДПЦ-2: ");
+if(m_mes81.calibrate_DPC2 == 0)
+	sRez += tr("Не выполнена");
+else
+	sRez += tr("Выполнена");
+
+sRez += CR;
+\end{minted}
+\medskip
+
+Метод \texttt{decodeMes81} производит анализ полей сообщения статуса. Вся полученная информация сохраняется для
+последующей записи в журнал.
+
+Работа метода \texttt{decodeMes01}, анализирующего сообщения с навигационными данными, аналогична методу
+\texttt{decodeMes81}, за исключением\break необходимости преобразования координат в удобную для чтения форму.
+
+\subsection{Модуль тестирования принтера}
+Данный модуль используется для проверки корректности настроек\break подключения принтера и проверки качества печати путем
+печати тестовой страницы.
+
+Метод \texttt{test} производит проверку параметров подключения устройства, после чего осуществляется настройка
+диалогового окна для печати тестовой страницы.
+\medskip
+\begin{minted}{c++}
+QPrinter printer(QPrinter::HighResolution);
+printer.setOrientation(QPrinter::Portrait);
+printer.setDocName (ID_FUNC9);
+QWidget * widg = qobject_cast<QWidget *>(parent());
+
+QPrintPreviewDialog dlgPreview(&printer, widg);
+connect(&dlgPreview, SIGNAL(paintRequested(QPrinter * )), this, SLOT(print(QPrinter *)));
+dlgPreview.resize(800, 800);
+dlgPreview.show();
+dlgPreview.exec();
+
+if (QMessageBox::question(0, ID_FUNC9, ID_FUNC24, QMessageBox::Yes, QMessageBox::No) == QMessageBox::Yes)
+{
+	sRez += CR;
+	sRez += tr("Тестовая страница напечатана корректно!");
+	return 0;
+}
+
+sRez += CR;
+sRez += tr("Тестовая страница напечатана некорректно!");
+
+return 1;
+\end{minted}
+\medskip
+
+Печать страницы осуществляется с помощью средств библиотеки Qt. Объект \texttt{QPrinter} представляет собой виртуальное
+устройство печати. Метод \texttt{test} осуществляет настройку параметров печати страницы, после чего происходит
+настройка диалогового окна печати. Для генерации тестовой страницы используется метод \texttt{print}, который вызывается
+при создании перевью документа, подготовленного для печати. Проверка корректности печати осуществляется оператором.
+Результаты проверки вносятся в журнал с помощью соответствующих кнопок \texttt{QMessageBox}. Далее рассмотрим метод,
+отвечающий за создание тестовой страницы.
+\medskip
+\begin{minted}{c++}
+void QTestPrinter::print(QPrinter * printer)
+{
+  printer->setFullPage(false);
+  QPainter paint(printer);
+  QFont font = paint.font();
+  font.setPointSize(16);
+  paint.setFont(font);
+
+
+
+  qreal left, top, right, bottom;
+
+  printer->getPageMargins (&left, &top, &right, &bottom, QPrinter::DevicePixel);
+  QRectF rectPaint = printer->paperRect(QPrinter::DevicePixel);
+
+  QRect rectTitle = QRect(QPoint(rectPaint.left() + left + 10, rectPaint.top() + top + 10), QPoint(rectPaint.right() - right - left - 10, rectPaint.top() + top + rectPaint.height()/15));
+  paint.drawRect(rectTitle);
+
+  _SETT_ARM sett;
+  getSettARM(sett);
+
+  QString sIzdelie = QString("%1, %2").arg( getNameObject1B12(sett.typeObject)).arg( getNameDevice(sett.idARM));
+  paint.drawText(rectTitle, Qt::AlignCenter, QDateTime::currentDateTime().toString("yyyy-MM-dd hh:mm:ss") + " " + sIzdelie);
+
+  int i;
+  int pointSize = 34;
+  int y = rectPaint.height()/15 + top + 20;
+  for (i = 0; i < 10; i++)
+  {
+	  QRect rectText(QPoint(rectPaint.width()/25,y), QPoint(rectPaint.right() - right, y + rectPaint.height()/15));
+	  font.setPointSize(pointSize);
+	  paint.setFont(font);
+	  paint.drawText(rectText, Qt::AlignVCenter | Qt::AlignLeft, ID_FUNC9);
+	  y += rectPaint.height()/15;
+	  pointSize -= 2;
+	  printer->setFullPage(false);
+
+  }
+
+  printer->setFullPage(true);
+}
+
+\end{minted}
+\medskip
+
+Метод получает указатель на устройство печати типа \texttt{QPrinter}. Данный указатель используется для настройки
+параметров печати. Метод производит настройку параметров страницы, настройку используемого шрифта, после чего формирует
+место под заголовок страницы. Далее производится заполнение документа тестовыми строками.
+
+\texttt{Модуль тестирования АРМ}
+Данный модуль осуществляет проверку состояния подключения к сети всех АРМ, находящихся в машине.
+\medskip
+\begin{minted}{c++}
+quint8 QTestARM::test(quint8 idDevice, QString & sRez) {
+	_SETT_ARM sett;
+	if (!getSettARM(sett))
+		return 10;
+
+	_IP_DEVICE device = sett.shemeLAN.value(idDevice);
+
+	if (!device.idDevice)
+		return 10;
+
+	sRez += getNameDevice(device.idDevice);
+
+	if (!device.hashIP.size())
+	{
+		sRez += CR;
+		sRez += tr("Для устройства не заданы интерфейсы подключения к локальной сети!");
+		return 10;
+	}
+
+	QHashIterator<QString, QString> it(device.hashIP);
+
+	quint8 rez = 0;
+	while (it.hasNext())
+	{
+		it.next();
+		QString sLan = it.key();
+		QString sIP = it.value();
+
+		sRez += CR;
+		sRez += QString("%1 (%2): ").arg(sLan).arg(sIP);
+		sRez += CR;
+
+		quint8 rez1 = ping(sIP, sRez);
+
+		if (rez1)
+			rez = rez1;
+
+	}
+
+	return rez;
+}
+\end{minted}
+\medskip
+
+Метод осуществляет получение настроек АРМ и чтение схемы сети. На основе полученных данных происходит проверка
+корректности настроек АРМ. Если сетевые интерфейсы настроены корректно, происходит проверка состояния соседних АРМ путем
+посылки ping сообщений.
+
+\subsection{Модуль журналирования}
+Данный модуль отвечает за сохранения результатов тестирования в формате JSON. Формат JSON был выбран для хранения файлов
+журнала из-за того, что результирующий файл легко читается человеком. Также данный формат помогает легко выполнять
+сериализацию сложных структур данных. Рассмотрим работу функции, выполняющей сохранение данных в журнал.
+\medskip
+\begin{minted}{c++}
+void Journal::store(JournalEntry journalEntry)
+{
+	QString sDir = QApplication::applicationDirPath();
+	QString filename = sDir + "/Journal/data/" + journalEntry.getDate().toString("yyyy-MM") + ".json";
+	QFile file(filename);
+	if (!file.exists()) {
+		file.open(QIODevice::ReadWrite);
+		QTextStream stream(&file);
+		stream.setCodec("UTF-8");
+		stream << "[\n" << asJSON(journalEntry) << "\n]";
+		stream.flush();
+		file.close();
+	} else {
+		file.open(QIODevice::ReadOnly);
+		QTextStream inStream(&file);
+		inStream.setCodec("UTF-8");
+		QString jsonArray = inStream.readAll();
+		file.close();
+		QString jsonJournalEntry = asJSON(journalEntry);
+		appendEntryToArray(jsonArray, jsonJournalEntry);
+		file.open(QIODevice::WriteOnly);
+		QTextStream outStream(&file);
+		outStream.setCodec("UTF-8");
+		outStream << jsonArray;
+		outStream.flush();
+		file.close();
+	}
+}
+\end{minted}
+\medskip
+
+Данный метод отвечает за запись сформированной \texttt{JournalEntry} в JSON файл. Каждый файл содержит данные о всех
+тестах, проведенных за соответствующий месяц. В случае наличия файла с результатами предыдущих тестов за текущий месяц
+результаты текущего теста добавляются к массиву со всеми записями за месяц. В случае отсутствия файла с предыдущими
+записями происходит создание нового файла и добавление в него данных.

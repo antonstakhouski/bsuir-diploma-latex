@@ -1,0 +1,30 @@
+\begin{Verbatim}[commandchars=\\\{\}]
+\PYG{k+kt}{void} \PYG{n}{Journal}\PYG{o}{::}\PYG{n}{store}\PYG{p}{(}\PYG{n}{JournalEntry} \PYG{n}{journalEntry}\PYG{p}{)}
+\PYG{p}{\PYGZob{}}
+	\PYG{n}{QString} \PYG{n}{sDir} \PYG{o}{=} \PYG{n}{QApplication}\PYG{o}{::}\PYG{n}{applicationDirPath}\PYG{p}{();}
+	\PYG{n}{QString} \PYG{n}{filename} \PYG{o}{=} \PYG{n}{sDir} \PYG{o}{+} \PYG{l+s}{\PYGZdq{}/Journal/data/\PYGZdq{}} \PYG{o}{+} \PYG{n}{journalEntry}\PYG{p}{.}\PYG{n}{getDate}\PYG{p}{().}\PYG{n}{toString}\PYG{p}{(}\PYG{l+s}{\PYGZdq{}yyyy\PYGZhy{}MM\PYGZdq{}}\PYG{p}{)} \PYG{o}{+} \PYG{l+s}{\PYGZdq{}.json\PYGZdq{}}\PYG{p}{;}
+	\PYG{n}{QFile} \PYG{n+nf}{file}\PYG{p}{(}\PYG{n}{filename}\PYG{p}{);}
+	\PYG{k}{if} \PYG{p}{(}\PYG{o}{!}\PYG{n}{file}\PYG{p}{.}\PYG{n}{exists}\PYG{p}{())} \PYG{p}{\PYGZob{}}
+		\PYG{n}{file}\PYG{p}{.}\PYG{n}{open}\PYG{p}{(}\PYG{n}{QIODevice}\PYG{o}{::}\PYG{n}{ReadWrite}\PYG{p}{);}
+		\PYG{n}{QTextStream} \PYG{n+nf}{stream}\PYG{p}{(}\PYG{o}{\PYGZam{}}\PYG{n}{file}\PYG{p}{);}
+		\PYG{n}{stream}\PYG{p}{.}\PYG{n}{setCodec}\PYG{p}{(}\PYG{l+s}{\PYGZdq{}UTF\PYGZhy{}8\PYGZdq{}}\PYG{p}{);}
+		\PYG{n}{stream} \PYG{o}{\PYGZlt{}\PYGZlt{}} \PYG{l+s}{\PYGZdq{}[}\PYG{l+s+se}{\PYGZbs{}n}\PYG{l+s}{\PYGZdq{}} \PYG{o}{\PYGZlt{}\PYGZlt{}} \PYG{n}{asJSON}\PYG{p}{(}\PYG{n}{journalEntry}\PYG{p}{)} \PYG{o}{\PYGZlt{}\PYGZlt{}} \PYG{l+s}{\PYGZdq{}}\PYG{l+s+se}{\PYGZbs{}n}\PYG{l+s}{]\PYGZdq{}}\PYG{p}{;}
+		\PYG{n}{stream}\PYG{p}{.}\PYG{n}{flush}\PYG{p}{();}
+		\PYG{n}{file}\PYG{p}{.}\PYG{n}{close}\PYG{p}{();}
+	\PYG{p}{\PYGZcb{}} \PYG{k}{else} \PYG{p}{\PYGZob{}}
+		\PYG{n}{file}\PYG{p}{.}\PYG{n}{open}\PYG{p}{(}\PYG{n}{QIODevice}\PYG{o}{::}\PYG{n}{ReadOnly}\PYG{p}{);}
+		\PYG{n}{QTextStream} \PYG{n+nf}{inStream}\PYG{p}{(}\PYG{o}{\PYGZam{}}\PYG{n}{file}\PYG{p}{);}
+		\PYG{n}{inStream}\PYG{p}{.}\PYG{n}{setCodec}\PYG{p}{(}\PYG{l+s}{\PYGZdq{}UTF\PYGZhy{}8\PYGZdq{}}\PYG{p}{);}
+		\PYG{n}{QString} \PYG{n}{jsonArray} \PYG{o}{=} \PYG{n}{inStream}\PYG{p}{.}\PYG{n}{readAll}\PYG{p}{();}
+		\PYG{n}{file}\PYG{p}{.}\PYG{n}{close}\PYG{p}{();}
+		\PYG{n}{QString} \PYG{n}{jsonJournalEntry} \PYG{o}{=} \PYG{n}{asJSON}\PYG{p}{(}\PYG{n}{journalEntry}\PYG{p}{);}
+		\PYG{n}{appendEntryToArray}\PYG{p}{(}\PYG{n}{jsonArray}\PYG{p}{,} \PYG{n}{jsonJournalEntry}\PYG{p}{);}
+		\PYG{n}{file}\PYG{p}{.}\PYG{n}{open}\PYG{p}{(}\PYG{n}{QIODevice}\PYG{o}{::}\PYG{n}{WriteOnly}\PYG{p}{);}
+		\PYG{n}{QTextStream} \PYG{n+nf}{outStream}\PYG{p}{(}\PYG{o}{\PYGZam{}}\PYG{n}{file}\PYG{p}{);}
+		\PYG{n}{outStream}\PYG{p}{.}\PYG{n}{setCodec}\PYG{p}{(}\PYG{l+s}{\PYGZdq{}UTF\PYGZhy{}8\PYGZdq{}}\PYG{p}{);}
+		\PYG{n}{outStream} \PYG{o}{\PYGZlt{}\PYGZlt{}} \PYG{n}{jsonArray}\PYG{p}{;}
+		\PYG{n}{outStream}\PYG{p}{.}\PYG{n}{flush}\PYG{p}{();}
+		\PYG{n}{file}\PYG{p}{.}\PYG{n}{close}\PYG{p}{();}
+	\PYG{p}{\PYGZcb{}}
+\PYG{p}{\PYGZcb{}}
+\end{Verbatim}
