@@ -33,6 +33,7 @@
 *.tdo
 *.pdf
 *.gz*
+*.pygtex
 *~
 *.bak
 .vagrant/
