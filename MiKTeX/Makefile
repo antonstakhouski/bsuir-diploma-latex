@@ -11,7 +11,7 @@ XELATEX = lualatex --shell-escape
 DIPLOMA_REPORT_PDF = diploma_report
 PRACTICE_REPORT_PDF = practice_report
 ECONOMICS_REPORT_PDF = economics_report
-FEEDBACK_PDF = feedback
+FEEDBACK_REPORT_PDF = feedback_report
 COURSE_REPORT_PDF = course_report
 TITLE_PDF = diploma_title_only
 TASK_PDF = diploma_task_only
@@ -47,8 +47,8 @@ $(DIPLOMA_REPORT_PDF).pdf: *.tex
 	$(XELATEX) $(DIPLOMA_REPORT_PDF)
 	#cp $(DIPLOMA_REPORT_PDF).pdf ../example_diploma.pdf
 
-$(FEEDBACK_PDF).pdf: *.tex
-	$(XELATEX) $(FEEDBACK_PDF)
+$(FEEDBACK_REPORT_PDF).pdf: *.tex
+	$(XELATEX) $(FEEDBACK_REPORT_PDF)
 
 $(ECONOMICS_REPORT_PDF).pdf: *.tex
 	$(XELATEX) $(ECONOMICS_REPORT_PDF)
