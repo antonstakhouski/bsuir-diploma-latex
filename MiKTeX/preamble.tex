@@ -198,7 +198,7 @@
 \DeclareCaptionLabelSeparator{stb}{~--~}
 \captionsetup{labelsep=stb}
 \captionsetup[figure]{labelformat=stbfigure,justification=centering}
-\captionsetup[table]{labelformat=stbtable,justification=raggedright}
+\captionsetup[table]{labelformat=stbtable,justification=raggedright,format=hang,aboveskip=0pt}
 \renewcommand{\thesubfigure}{\asbuk{subfigure}}
 
 % Зачем: Окружения для оформления формул
@@ -228,11 +228,11 @@
     {
     %%% Следующие строки определяют специфические требования разных редакций стандартов. Раскоменнтируйте нужные 2 строки
     %% стандартный абзац, СТП-01 2010
-    \par
-    \tabularx{\textwidth-\fivecharsapprox}{@{}ll@{ --- } X }
+    %\par
+    %\tabularx{\textwidth-\fivecharsapprox}{@{}ll@{ --- } X }
     %% без отступа, СТП-01 2013
-    %\noindent
-    %\tabularx{\textwidth}{@{}ll@{ --- } X }
+    \noindent
+    \tabularx{\textwidth}{@{}ll@{ --- } X }
     }
     {
     \\[\parsep]
