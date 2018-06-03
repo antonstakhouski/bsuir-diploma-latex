@@ -1,0 +1,140 @@
+\setminted[c++]{fontfamily=tt,fontsize=\scriptsize,xleftmargin=0ex,breaklines=true,tabsize=4}
+\sectionadd*{ПРИЛОЖЕНИЕ В}
+\addcontentsline{toc}{section}{ПРИЛОЖЕНИЕ В}
+\label{sec:appendix_c}
+
+
+\begin{center}
+	\normalfont\normalsize{\textit{(обязательное)}}
+
+	\normalfont\normalsize{Листинг кода класса \texttt{QTestPrinter.cpp}}
+\end{center}
+
+\begin{minted}{c++}
+#include "QTestPrinter.h"
+#include <QPrintPreviewDialog>
+#include <QPainter>
+#include <QFont>
+#include <QDateTime>
+#include <QMessageBox>
+#include "RusTextFunkControl.h"
+#include "StaticGlobalFunc.h"
+#define CR "<br />" //"\r\n"
+
+#define ID_DEVICE_PRINTER 18
+
+QTestPrinter::QTestPrinter(QObject *parent)
+	: QObject(parent)
+{
+
+}
+
+QTestPrinter::~QTestPrinter()
+{
+
+}
+
+quint8 QTestPrinter::test(QString & sRez)
+{
+	sRez.clear();
+
+	_SETT_ARM sett;
+	if (!getSettARM(sett))
+	{
+		sRez += CR;
+		sRez += tr("Не заданы настройки подключения принтера!");
+		return 10;
+	}
+
+	QHashIterator<QString, _PORT_SETT> it(sett.shemeConnectedDevice);
+	_PORT_SETT portSett;
+	while (it.hasNext())
+	{
+		it.next();
+
+		portSett = it.value();
+
+		if (portSett.idDevice == ID_DEVICE_PRINTER)
+			break;
+
+	}
+
+	if (portSett.idDevice != ID_DEVICE_PRINTER)
+	{
+		sRez += CR;
+		sRez += tr("Не заданы настройки подключения принтера!");
+		return 10;
+	}
+
+	sRez += getNameDevice(ID_DEVICE_PRINTER);
+	sRez += CR;
+	sRez += tr("Параметры подключения: %1").arg(portSett.namePort);
+
+	QPrinter printer(QPrinter::HighResolution);
+	printer.setOrientation(QPrinter::Portrait);
+	printer.setDocName (ID_FUNC9);
+	QWidget * widg = qobject_cast<QWidget *>(parent());
+
+	QPrintPreviewDialog dlgPreview(&printer, widg);
+	connect(&dlgPreview, SIGNAL(paintRequested(QPrinter * )), this, SLOT(print(QPrinter *)));
+	dlgPreview.resize(800, 800);
+	dlgPreview.show();
+	dlgPreview.exec();
+
+	if (QMessageBox::question(0, ID_FUNC9, ID_FUNC24, QMessageBox::Yes, QMessageBox::No) == QMessageBox::Yes)
+	{
+		sRez += CR;
+		sRez += tr("Тестовая страница напечатана корректно!");
+		return 0;
+	}
+
+	sRez += CR;
+	sRez += tr("Тестовая страница напечатана некорректно!");
+
+	return 1;
+}
+
+void QTestPrinter::print(QPrinter * printer)
+{
+	printer->setFullPage(false);
+	QPainter paint(printer);
+	QFont font = paint.font();
+	font.setPointSize(16);
+	paint.setFont(font);
+
+
+
+	qreal left, top, right, bottom;
+
+	printer->getPageMargins (&left, &top, &right, &bottom, QPrinter::DevicePixel);
+	QRectF rectPaint = printer->paperRect(QPrinter::DevicePixel);
+
+	QRect rectTitle = QRect(QPoint(rectPaint.left() + left + 10, rectPaint.top() + top + 10), QPoint(rectPaint.right() - right - left - 10, rectPaint.top() + top + rectPaint.height()/15));
+	paint.drawRect(rectTitle);
+
+	_SETT_ARM sett;
+	getSettARM(sett);
+
+	QString sIzdelie = QString("%1, %2").arg(
+			getNameObject1B12(sett.typeObject)).arg(getNameDevice(sett.idARM));
+	paint.drawText(rectTitle, Qt::AlignCenter, QDateTime::currentDateTime().toString("yyyy-MM-dd hh:mm:ss") + " " + sIzdelie);
+
+	int i;
+	int pointSize = 34;
+	int y = rectPaint.height()/15 + top + 20;
+	for (i = 0; i < 10; i++)
+	{
+		QRect rectText(QPoint(rectPaint.width()/25,y), QPoint(rectPaint.right() - right, y + rectPaint.height()/15));
+		font.setPointSize(pointSize);
+		paint.setFont(font);
+		paint.drawText(rectText, Qt::AlignVCenter | Qt::AlignLeft, ID_FUNC9);
+		y += rectPaint.height()/15;
+		pointSize -= 2;
+		printer->setFullPage(false);
+
+	}
+
+	printer->setFullPage(true);
+}
+\end{minted}
+\clearpage

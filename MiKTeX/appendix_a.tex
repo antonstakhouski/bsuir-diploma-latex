@@ -1,0 +1,849 @@
+\setminted[c++]{fontfamily=tt,fontsize=\scriptsize,xleftmargin=0ex,breaklines=true,tabsize=4}
+\sectionadd*{ПРИЛОЖЕНИЕ А}
+\addcontentsline{toc}{section}{ПРИЛОЖЕНИЕ А}
+\label{sec:appendix_a}
+
+
+\begin{center}
+	\normalfont\normalsize{\textit{(обязательное)}}
+
+	\normalfont\normalsize{Листинг кода класса \texttt{OffLineFuncControl}}
+\end{center}
+
+
+\begin{minted}{c++}
+#include "OffLineFuncControl.h"
+#include <QPixmap>
+#include <QBitmap>
+#include <QMessageBox>
+#include <QFont>
+#include <QFile>
+#include <QDir>
+#include <QActionGroup>
+#include <QCheckBox>
+#include <QMessageBox>
+#include <QByteArray>
+#include <QTreeWidgetItem>
+#include <QTreeWidgetItemIterator>
+#include <QtTest/QtTest>
+#include <QTextStream>
+#include <QHostAddress>
+#include "Fun.h"
+#include "RusTextFunkControl.h"
+#include "RusTextRedUsers.h"
+#include "QTestPrinter.h"
+#include "QTestARM.h"
+#include "VTest_R181.h"
+#include "VTest_MeteoWXT520.h"
+#include "VTest_1D22.h"
+#include "VTest_BI.h"
+#include "VTest_BINS3.h"
+#include "CoordContain.h"
+#include "VTest_GPS.h"
+#include "VTest_Kaponir.h"
+
+#include "Journal.h"
+
+
+#include <QPrintPreviewDialog>
+#include <QPainter>
+#include <QFont>
+#include <QDateTime>
+#include <QCalendarWidget>
+#include <QDialog>
+#include <QGridLayout>
+#include <QDateEdit>
+#include <QTimeEdit>
+#include <QDateTimeEdit>
+#include <QProcess>
+#include <QStatusBar>
+#include "VPushButtonIdent.h"
+
+#include "StaticGlobalFunc.h"
+#include "qdbloader.h"
+#include "qtsingleapplication.h"
+
+#define CR "<br />"
+
+OffLineFuncControl::OffLineFuncControl(QWidget *parent, Qt::WFlags flags)
+	: QMainWindow(parent, flags)
+{
+
+	QDir dir = QDir::current();
+	if (dir.cdUp()) {
+		QString sDir = dir.absolutePath();
+		QFile file(sDir + "/StyleSheet/ScreenStyleLegion.stl");
+		if (file.open(QIODevice::ReadOnly)) {
+			QByteArray s = file.readAll();
+			QString sStyle(s);
+			qApp->setStyleSheet(sStyle);
+			m_Menu.setStyleSheet(sStyle);
+			file.close();
+		}
+	}
+	QString sTimeCompile = __TIMESTAMP__;
+	QDateTime tt = QDateTime::fromString(sTimeCompile);
+
+	m_sockReceiveUpdate.bind(QHostAddress::LocalHost, 15558, QUdpSocket::ReuseAddressHint);
+
+	m_pActInfo = m_Menu.addAction(QIcon(":/OffLineFuncControl/Resources/info.png"), ID_FUNC_FONE_4);
+
+	m_pActSetParam = m_Menu.addAction(ID_FUNC_FONE_5);
+	m_pMenuSNS = m_Menu.addMenu(tr("Выбор СНС"));
+	m_pActSNS_GPS_GLONASS = m_pMenuSNS->addAction(tr("GPS/Глонасс"));
+	m_pActSNS_GPS = m_pMenuSNS->addAction(tr("GPS"));
+	m_pActSNS_GLONASS = m_pMenuSNS->addAction(tr("Глонасс"));
+	QActionGroup * pActGr = new QActionGroup(this);
+	pActGr->addAction(m_pActSNS_GPS_GLONASS);
+	pActGr->addAction(m_pActSNS_GPS);
+	pActGr->addAction(m_pActSNS_GLONASS);
+
+	m_bStartTest = false;
+	setMinimumSize(800, 450);
+	QWidget * pCentralWidg = new QWidget(this);
+	setCentralWidget(pCentralWidg);
+
+	setWindowTitle(ID_FUNC1);
+
+	QPixmap picFunControl = QPixmap(":/OffLineFuncControl/Resources/fun_control.PNG");
+	picFunControl.setMask(picFunControl.createHeuristicMask());
+	setWindowIcon(QIcon(picFunControl));
+
+	m_pTreeDevice = new QSimpleBWTree(pCentralWidg);
+	m_pTreeDevice->setRootIsDecorated(true);
+	m_pTreeDevice->setColumnCount(3);
+	m_pTreeDevice->setColumnForSelect(1);
+	m_pTreeDevice->setHeaderLabels(QStringList() << ID_FUNC_AKPP_1 << ID_FUNC_AKPP_2 << tr("Информация"));
+	QTreeWidgetItem * pHeader = m_pTreeDevice->headerItem();
+
+	if (pHeader) {
+		pHeader->setSizeHint(0, QSize(0, 32));
+	}
+
+	m_pBtStart = new QPushButton(ID_FUNC12, pCentralWidg);
+	m_pBtStart->setIcon(QIcon(":/OffLineFuncControl/Resources/play.png"));
+	m_pBtStart->setObjectName("pbCentred");
+
+	m_pBtPrint = new QPushButton(tr("Печать"), pCentralWidg);
+	m_pBtPrint->setIcon(QIcon(":/OffLineFuncControl/Resources/print.png"));
+	m_pBtPrint->setObjectName("pbCentred");
+
+	m_pBtSettings = new QPushButton(ID_FUNC3, pCentralWidg);
+	m_pBtSettings->setIcon(QIcon(":/OffLineFuncControl/Resources/nastr_ARM.PNG"));
+	m_pBtSettings->setObjectName("pbCentred");
+
+	m_pBtJournal = new QPushButton(ID_FUNK_JOURNAL_OPEN, pCentralWidg);
+	m_pBtJournal->setIcon(QIcon(":/OffLineFuncControl/Resources/marshruty.PNG"));
+	m_pBtJournal->setObjectName("pbCentred");
+
+	m_pBtTestKS = new QPushButton(tr("Тест КС"), pCentralWidg);
+	m_pBtTestKS->setIcon(QIcon(":/OffLineFuncControl/Resources/Radio.png"));
+	m_pBtTestKS->setObjectName("pbCentred");
+
+	m_pBtExit = new QPushButton(tr("Закрыть"), pCentralWidg);
+	m_pBtExit->setIcon(QIcon(":/OffLineFuncControl/Resources/Exit.PNG"));
+
+	loadDevices();
+
+	connect(m_pTreeDevice, SIGNAL(itemClicked(QTreeWidgetItem *, int)), this, SLOT(onChangeCheckDevice(QTreeWidgetItem *, int)));
+	connect(m_pTreeDevice, SIGNAL(keyPress(int)), this, SLOT(onChangeCheckDevice(int)));
+	connect(m_pTreeDevice, SIGNAL(signCustomContextMenu(QPoint &)), this, SLOT(onMenu(QPoint &)));
+	connect(m_pActInfo, SIGNAL(triggered()), this, SLOT(onInfo()));
+	connect(m_pBtStart, SIGNAL(clicked()), this, SLOT(onStart()));
+	connect(m_pBtPrint, SIGNAL(clicked()), this, SLOT(onPrint()));
+	connect(m_pBtJournal, SIGNAL(clicked()), this, SLOT(onJournal()));
+	connect(m_pBtSettings, SIGNAL(clicked()), this, SLOT(onSettings()));
+	connect(m_pBtTestKS, SIGNAL(clicked()), this, SLOT(onTestKS()));
+	connect(m_pBtExit, SIGNAL(clicked()), this, SLOT(close()));
+	connect(&m_sockReceiveUpdate, SIGNAL(readyRead()), SLOT(receiveSignalUpdate()));
+}
+
+OffLineFuncControl::~OffLineFuncControl()
+{
+
+}
+
+void OffLineFuncControl::closeEvent(QCloseEvent * e)
+{
+	QtSingleApplication * pApp =   qobject_cast<QtSingleApplication *>(qApp);
+	if (pApp)
+	{
+		pApp->sendMessage("Imitator_R181", "LEGIONPANEL:TERMINATE");
+	}
+
+	e->accept();
+}
+
+void OffLineFuncControl::receiveSignalUpdate()
+{
+	while (m_sockReceiveUpdate.hasPendingDatagrams())
+	{
+		QByteArray datagram;
+		datagram.resize(m_sockReceiveUpdate.pendingDatagramSize());
+		QHostAddress sender;
+		quint16 senderPort;
+
+		m_sockReceiveUpdate.readDatagram(datagram.data(), datagram.size(),
+				&sender, &senderPort);
+
+		loadDevices();
+	}
+}
+
+void OffLineFuncControl::onInfoDevice(QVariant id)
+{
+	QTreeWidgetItem * item = m_pTreeDevice->findItemByDataUnique(1, id);
+
+	if (!item)
+		return;
+
+	QString sInfo = item->data(2, Qt::UserRole).toString();
+
+	QDialog dlg(m_pTreeDevice);
+	QTextEdit textInfo(&dlg);
+	QPushButton btExit(&dlg);
+	btExit.setText(tr("Закрыть"));
+	QGridLayout l(&dlg);
+	l.addWidget(&textInfo);
+	l.addWidget(&btExit);
+	connect(&btExit, SIGNAL(clicked()), &dlg, SLOT(accept()));
+
+	dlg.setWindowTitle(ID_FUNC_FONE_4 + ": " + item->text(0));
+	dlg.setMinimumWidth(350);
+	dlg.resize(700, 600);
+	textInfo.setReadOnly(true);
+
+	textInfo.setHtml (sInfo);
+	dlg.exec();
+}
+
+void OffLineFuncControl::onInfo()
+{
+	QTreeWidgetItem * item = m_pTreeDevice->currentItem();
+	if (!item)
+		return;
+	QTreeWidgetItem * itemParent = item->parent();
+	if (!itemParent)
+		return;
+
+	QVariant idDevice = item->data(1, Qt::UserRole);
+
+	onInfoDevice(idDevice);
+
+
+}
+
+quint8 OffLineFuncControl::onTestARM(quint8 numARM, QString & sRez) {
+
+	if ((numARM >= 1 && numARM <= 4) || numARM == 7) {
+		QTestARM test(this);
+		return test.test(numARM, sRez);
+	}
+
+
+	return 3;
+}
+
+void OffLineFuncControl::messageReceived(const QString& message)
+{
+	if (message == "OffLineFuncControl" || message == "LEGIONPANEL:ACTIVATE")
+	{
+		QRect r = geometry();
+		this->hide();
+		this->setWindowState(Qt::WindowMinimized);
+		this->setVisible(true);
+		this->setWindowState(this->windowState() & ~Qt::WindowMinimized | Qt::WindowActive);
+
+		this->raise();
+		this->activateWindow();
+		setGeometry(r);
+	}
+	else if (message == "UPDATE_SETT_ARM")
+	{
+	}
+	else if (message == "LEGIONPANEL:TERMINATE")
+	{
+		close();
+	}
+
+}
+
+
+void OffLineFuncControl::onMenu(QPoint & pos) {
+	m_pActInfo->setEnabled(true);
+
+	QTreeWidgetItem * item = m_pTreeDevice->currentItem();
+	if (!item)
+		return;
+	if (item->childCount())
+		return;
+	QString sInfo = item->data(2, Qt::UserRole).toString();
+	if (!sInfo.length())
+		m_pActInfo->setEnabled(false);
+
+
+	quint8 deviceId = item->data(1, Qt::UserRole).toUInt();
+
+
+
+	if ((deviceId == 99)
+			&& !m_bStartTest)
+	{
+		m_pActSetParam->setVisible(true);
+		m_pMenuSNS->menuAction()->setVisible(true);
+	}
+	else
+	{
+		m_pActSetParam->setVisible(false);
+		m_pMenuSNS->menuAction()->setVisible(false);
+	}
+
+	m_Menu.popup(pos);
+
+}
+
+void OffLineFuncControl::onStart() {
+	if (m_bStartTest)
+		return;
+	m_bStartTest = true;
+	m_pBtStart->setEnabled(false);
+	m_pBtPrint->setEnabled(false);
+	m_pBtSettings->setEnabled(false);
+	m_pBtJournal->setEnabled(false);
+	QTreeWidgetItemIterator it(m_pTreeDevice);
+
+	JournalEntry journalEntry;
+	QString sRez;
+	while (*it) {
+		sRez = "";
+		QTreeWidgetItem * item = *it;
+		if ((item->checkState(0) != Qt::Checked) || item->childCount() || item->isHidden())
+		{
+			++it;
+			continue;
+		}
+
+		item->setForeground(1, QBrush(Qt::black));
+		item->setText(1, ID_FUNC_FONE_2 + "...");
+
+		quint32 idItem = item->data(1, Qt::UserRole).toUInt();
+
+		m_pTreeDevice->clearSelections();
+		m_pTreeDevice->selectItemById(idItem, true);
+
+		QTest::qWait(500);
+
+		QString sNameDevise = item->text(0);
+		QString sNameDeviseParent = item->text(0);
+
+		quint8 deviceId = item->data(1, Qt::UserRole).toUInt();
+
+		quint8 rez = 0;
+
+		switch (deviceId)
+		{
+			case 1:
+			case 2:
+			case 3:
+			case 4:
+			case 5:
+			case 20:
+			case 21:
+			case 22:
+			case 23:
+				{
+					///АРМы
+					QTestARM test(this);
+					rez = test.test(deviceId, sRez);
+					break;
+				}
+			case 6:
+			case 7:
+			case 8:
+			case 9:
+			case 109:
+			case 10:
+			case 16:
+				{
+					//Р-180, Р-181
+					VTest_R181 test(this);
+					rez = test.test(deviceId, sRez);
+					break;
+				}
+			case 11:
+				{
+					//Метеостанция
+					VTest_MeteoWXT520 test(this);
+					rez = test.test(sRez);
+					break;
+
+				}
+			case 12:
+				{
+					//БИНС-3
+					VTest_BINS3 test(this);
+					rez = test.test(sRez);
+					break;
+
+				}
+			case 13:
+				{
+					//1Д22
+					VTest_1D22 test(this);
+					rez = test.test(sRez);
+					break;
+
+				}
+			case 14:
+				{
+					//Капонир
+					VTest_Kaponir test(this);
+					rez = test.test(sRez);
+					break;
+
+				}
+			case 15:
+				{
+					//Блок индикации
+					VTest_BI test(this);
+					rez = test.test(sRez);
+					break;
+
+				}
+			case 17:
+				{
+					//GPS
+					VTest_GPS test(this);
+					rez = test.test(sRez);
+					break;
+				}
+			case 18:
+				{
+					//Принтер
+					QTestPrinter test(this);
+					rez = test.test(sRez);
+					break;
+				}
+		}
+
+		DeviceInfo deviceInfo;
+		deviceInfo.deviceName = sNameDevise;
+		QString sRezSaved = sRez;
+		sRezSaved.replace("\r\n", CR);
+		sRezSaved.replace("\"", "\\\"");
+		deviceInfo.additionalInfo = sRezSaved;
+
+		item->setData(2, Qt::UserRole, sRez);
+		VPushButtonIdent * bt = qobject_cast<VPushButtonIdent *>(m_pTreeDevice->itemWidget(item, 2));
+		if (bt)
+		{
+			bt->setEnabled(sRez.length());
+		}
+		if (rez == 0)
+		{
+			item->setForeground(1, QBrush(QColor(0, 150, 0)));
+			item->setText(1, ID_FUNC_AKPP_7);
+			deviceInfo.resultMessage = ID_FUNC_AKPP_7;
+			deviceInfo.hasError = false;
+		}
+		else if (rez == 1 || rez > 3)
+		{
+			item->setForeground(1, QBrush(QColor(150, 0, 0)));
+			item->setText(1, ID_FUNC_AKPP_8);
+			deviceInfo.resultMessage = ID_FUNC_AKPP_8;
+			deviceInfo.hasError = true;
+		}
+		else if (rez == 2)
+		{
+			item->setForeground(1, QBrush(QColor(150, 0, 0)));
+			item->setText(1, ID_FUNC_AKPP_9);
+			deviceInfo.resultMessage = ID_FUNC_AKPP_9;
+			deviceInfo.hasError = true;
+		}
+		else if (rez == 3)
+		{
+			item->setForeground(1, QBrush(QColor(150, 0, 0)));
+			item->setText(1, ID_FUNC_AKPP_10);
+			deviceInfo.resultMessage = ID_FUNC_AKPP_10;
+			deviceInfo.hasError = true;
+		}
+
+		saveRezTest(sNameDevise, deviceInfo.resultMessage, rez);
+
+		journalEntry.addDevice(deviceInfo);
+		++it;
+	}
+
+	Journal::store(journalEntry);
+
+	m_pTreeDevice->clearSelections();
+	m_pBtStart->setEnabled(true);
+	m_pBtPrint->setEnabled(true);
+	m_pBtSettings->setEnabled(true);
+	m_pBtJournal->setEnabled(true);
+	m_bStartTest = false;
+
+}
+
+bool OffLineFuncControl::saveRezTest(QString sNameDevice, QString sRezSaved, quint8 rez)
+{
+	QString sDir = QApplication::applicationDirPath();
+	QFile f(sDir + "/Journal/data/Last/" + sNameDevice + ".test");
+
+	if (!f.open(QIODevice::ReadWrite))
+		return false;
+
+	QTextStream s(&f);
+	if (rez)
+		s << "0\r\n";
+	else
+		s << "1\r\n";
+	s << sRezSaved;
+
+	f.close();
+
+	return true;
+}
+
+void OffLineFuncControl::onChangeCheckDevice(QTreeWidgetItem * item, int column) {
+	if (column != 0)
+		return;
+
+	if (!item)
+		return;
+
+	Qt::CheckState stateOld = (Qt::CheckState)item->data(0, Qt::UserRole).toInt();
+	Qt::CheckState state = item->checkState(0);
+
+	item->setData(0, Qt::UserRole, state);
+
+	if (stateOld == state)
+		return;
+
+	if (item->childCount() > 0) {
+
+		for (quint32 i = 0; i < item->childCount(); i++) {
+			QTreeWidgetItem * itemChild = item->child(i);
+			if (!itemChild)
+				continue;
+			if (!(itemChild->flags() & Qt::ItemIsEnabled))
+				continue;
+			QString sText = itemChild->text(0);
+			itemChild->setCheckState(0, state);
+
+			if (itemChild->childCount() > 0)
+				onChangeCheckDevice(itemChild, column);
+
+			itemChild->setData(0, Qt::UserRole, state);
+
+		}
+	}
+
+	{
+		QTreeWidgetItem * itemParent = item->parent();
+		if (!itemParent)
+			return;
+		if (state == Qt::Checked) {
+			itemParent->setCheckState(0, state);
+			itemParent->setData(0, Qt::UserRole, state);
+
+			if (itemParent->parent()) {
+				itemParent->parent()->setCheckState(0, state);
+				itemParent->parent()->setData(0, Qt::UserRole, state);
+			}
+		} else {
+			bool b = true;
+			for (quint32 i = 0; i < itemParent->childCount(); i++) {
+				QTreeWidgetItem * itemChild = itemParent->child(i);
+				if (!itemChild)
+					continue;
+				if (!(itemChild->flags() & Qt::ItemIsEnabled))
+					continue;
+				Qt::CheckState st = itemChild->checkState(0);
+				if (st == Qt::Checked) {
+					b = false;
+					break;
+				}
+			}
+			if (b) {
+				itemParent->setCheckState(0, Qt::Unchecked);
+
+				if (itemParent->parent()) {
+					onChangeCheckDevice(itemParent, column);
+				}
+
+				itemParent->setData(0, Qt::UserRole, Qt::Unchecked);
+			}
+
+		}
+
+	}
+
+}
+
+void OffLineFuncControl::onChangeCheckDevice(int key) {
+	QTreeWidgetItem * pItem = m_pTreeDevice->currentItem();
+
+	if (!pItem)
+		return;
+	if (key != Qt::Key_Space)
+		return;
+
+	onChangeCheckDevice(pItem, 0);
+
+}
+
+void OffLineFuncControl::loadDevices() {
+
+	m_pTreeDevice->clear();
+
+	QList<quint8> groups = getListGroupsDevices();
+	QHash<quint8, QTreeWidgetItem *> groupWidgetHash;
+
+	for (quint8 i = 0; i < groups.size(); i++) {
+
+		QTreeWidgetItem * pItemGroup = new QTreeWidgetItem(m_pTreeDevice);
+		quint8 groupId = groups[i];
+		groupWidgetHash.insert(groupId, pItemGroup);
+		QString groupName = getNameGroupDevice( groups[i] );
+
+		QFont f = pItemGroup->font(0);
+		f.setBold(true);
+		pItemGroup->setFont(0, f);
+		pItemGroup->setText(0, groupName);
+		pItemGroup->setSizeHint(0, QSize(0, 32));
+		m_pTreeDevice->insertTopLevelItem(0, pItemGroup);
+		pItemGroup->setExpanded(true);
+		Qt::ItemFlags flags = pItemGroup->flags();
+		flags |= Qt::ItemIsUserCheckable;
+
+		pItemGroup->setFlags(flags);
+		pItemGroup->setCheckState(0, Qt::Checked);
+		pItemGroup->setData(0, Qt::UserRole, Qt::Checked);
+		pItemGroup->setData(1, Qt::UserRole, 0);
+
+		pItemGroup->setHidden(true);
+
+	}
+	_SETT_ARM sett;
+	getSettARM(sett);
+
+	QHash<quint8, _IP_DEVICE>& lanDevices =  sett.shemeLAN;
+	QHash<quint8, _IP_DEVICE>::iterator lanDeviceIter;
+	for (lanDeviceIter = lanDevices.begin(); lanDeviceIter != lanDevices.end(); ++lanDeviceIter)
+	{
+		quint8 lanDeviceId = lanDeviceIter.key();
+		QString lanDeviceName = getNameDevice(lanDeviceId);
+
+		quint8 lanDeviceGroupId = getIdGroupForDevice(lanDeviceId);
+		QTreeWidgetItem * groupWidget = groupWidgetHash[lanDeviceGroupId];
+
+		if (!groupWidget)
+			continue;
+
+		groupWidget->setHidden(false);
+
+		QTreeWidgetItem * pItem = new QTreeWidgetItem(groupWidget);
+		Qt::ItemFlags flags = pItem->flags();
+		flags |= Qt::ItemIsUserCheckable;
+		pItem->setText(0, lanDeviceName);
+		pItem->setFlags(flags);
+		pItem->setCheckState(0, Qt::Checked);
+		pItem->setData(0, Qt::UserRole, Qt::Checked);
+		pItem->setData(1, Qt::UserRole, lanDeviceId);
+		pItem->setSizeHint(0, QSize(0, 32));
+
+		QString qstr;
+		VPushButtonIdent * pBtInfo = new VPushButtonIdent(qstr, m_pTreeDevice);
+		pBtInfo->setObjectName("pbCentred");
+		pBtInfo->setIcon(QIcon(":/OffLineFuncControl/Resources/info.png"));
+		pBtInfo->setId(lanDeviceId);
+		m_pTreeDevice->setItemWidget(pItem, 2, pBtInfo);
+		pBtInfo->setEnabled(false);
+
+		connect(pBtInfo, SIGNAL(clickedId(QVariant )), SLOT(onInfoDevice(QVariant )));
+	}
+
+	QHash<QString, _PORT_SETT>& portDevices = sett.shemeConnectedDevice;
+	QHash<QString, _PORT_SETT>::iterator portDeviceIter;
+	for (portDeviceIter = portDevices.begin(); portDeviceIter != portDevices.end(); ++portDeviceIter)
+	{
+		quint8 portDeviceId = portDeviceIter.value().idDevice;
+		QString portDeviceName = getNameDevice(portDeviceId);
+
+		quint8 portDeviceGroupId = getIdGroupForDevice(portDeviceId);
+		QTreeWidgetItem * groupWidget = groupWidgetHash[portDeviceGroupId];
+
+		if (!groupWidget)
+			continue;
+
+		groupWidget->setHidden(false);
+
+
+		QTreeWidgetItem * pItem = new QTreeWidgetItem(groupWidget);
+		Qt::ItemFlags flags = pItem->flags();
+		flags |= Qt::ItemIsUserCheckable;
+		pItem->setText(0, portDeviceName);
+		pItem->setFlags(flags);
+		pItem->setCheckState(0, Qt::Checked);
+		pItem->setData(0, Qt::UserRole, Qt::Checked);
+		pItem->setData(1, Qt::UserRole, portDeviceId);
+		pItem->setSizeHint(0, QSize(0, 32));
+
+		QString qstr;
+		VPushButtonIdent * pBtInfo = new VPushButtonIdent(qstr, m_pTreeDevice);
+		pBtInfo->setObjectName("pbCentred");
+		pBtInfo->setIcon(QIcon(":/OffLineFuncControl/Resources/info.png"));
+		pBtInfo->setId(portDeviceId);
+		m_pTreeDevice->setItemWidget(pItem, 2, pBtInfo);
+		pBtInfo->setEnabled(false);
+		connect(pBtInfo, SIGNAL(clickedId(QVariant )), SLOT(onInfoDevice(QVariant )));
+	}
+
+	m_pTreeDevice->repaintTreeByBW();
+
+}
+
+void OffLineFuncControl::resizeEvent(QResizeEvent * e) {
+	QMainWindow::resizeEvent(e);
+
+	static QString sJourn = m_pBtJournal->text();
+	static QString sPrint = m_pBtPrint->text();
+	static QString sSett = m_pBtSettings->text();
+
+	static QString sTestKS = m_pBtTestKS->text();
+	static QString sStart = m_pBtStart->text();
+	static QString sExit = m_pBtExit->text();
+
+
+	int w = centralWidget()->width();
+	int h = centralWidget()->height();
+
+	m_pTreeDevice->setGeometry(2, 0, w - 4, h - 50);
+
+	m_pTreeDevice->setColumnWidth(0, w * 0.60);
+	m_pTreeDevice->setColumnWidth(1, w * 0.25);
+	m_pTreeDevice->setColumnWidth(2, w * 0.14);
+
+	if (w > 1030)
+	{
+		m_pBtExit->setText(sExit);
+		m_pBtStart->setText(sStart);
+		m_pBtTestKS->setText(sTestKS);
+
+		m_pBtJournal->setText(sJourn);
+		m_pBtPrint->setText(sPrint);
+		m_pBtSettings->setText(sSett);
+
+
+		m_pBtExit->setGeometry(w - 150, h - 45, 140, 40);
+		m_pBtStart->setGeometry(w - 400, h - 45, 190, 40);
+		m_pBtTestKS->setGeometry(w - 550, h - 45, 140, 40);
+
+		m_pBtJournal->setGeometry(10, h - 45, 150, 40);
+		m_pBtPrint->setGeometry(170, h - 45, 150, 40);
+		m_pBtSettings->setGeometry(330, h - 45, 150, 40);
+	}
+	else
+	{
+		m_pBtExit->setText("");
+		m_pBtStart->setText("");
+		m_pBtTestKS->setText("");
+
+		m_pBtJournal->setText("");
+		m_pBtPrint->setText("");
+		m_pBtSettings->setText("");
+
+
+		m_pBtExit->setGeometry(w - 110, h - 45, 100, 40);
+		m_pBtStart->setGeometry(w - 210, h - 45, 100, 40);
+		m_pBtTestKS->setGeometry(w - 310, h - 45, 100, 40);
+
+		m_pBtJournal->setGeometry(10, h - 45, 100, 40);
+		m_pBtPrint->setGeometry(110, h - 45, 100, 40);
+		m_pBtSettings->setGeometry(210, h - 45, 100, 40);
+	}
+
+
+
+}
+
+void OffLineFuncControl::onJournal()
+{
+	QString sPath = QCoreApplication::applicationDirPath ();
+	QProcess::startDetached(sPath + "/Journal.exe", QStringList() << "-CP" << "2");
+}
+
+void OffLineFuncControl::onPrint() {
+	QPrinter printer(QPrinter::HighResolution);
+	printer.setOrientation(QPrinter::Portrait);
+	printer.setDocName(ID_FUNC1);
+
+
+	QPrintPreviewDialog dlgPreview(&printer, this);
+	connect(&dlgPreview, SIGNAL(paintRequested(QPrinter *)), this, SLOT(print(QPrinter *)));
+	dlgPreview.resize(800, 800);
+	dlgPreview.show();
+	dlgPreview.exec();
+}
+
+void OffLineFuncControl::print(QPrinter * printer) {
+	printer->setFullPage(false);
+	QPainter paint(printer);
+	QFont font = paint.font();
+	font.setPointSize(16);
+	paint.setFont(font);
+
+
+	QRect rectPaint = paint.window();
+
+
+	QRect rectTitle = QRect(QPoint(rectPaint.left() + 80, rectPaint.top() + 120), QPoint(rectPaint.right() - 20, rectPaint.top() + 120 + (rectPaint.height() / 20)));
+	paint.drawRect(rectTitle);
+	paint.drawText(rectTitle, Qt::AlignCenter, QDateTime::currentDateTime().toString("yyyy-MM-dd hh:mm:ss") + " " + ID_FUNC1);
+
+	int i;
+	font.setPointSize(12);
+	paint.setFont(font);
+	QFontMetrics metr = paint.fontMetrics();
+	QTreeWidgetItemIterator it(m_pTreeDevice);
+	int h = metr.lineSpacing();
+	int y = rectTitle.bottom() + h;
+	while (*it) {
+		QTreeWidgetItem * item = *it;
+		int level = m_pTreeDevice->getLevelItem(item);
+		if (level == 1)
+			font.setBold(true);
+		else
+			font.setBold(false);
+		paint.setFont(font);
+		QRect rectText1(QPoint(rectPaint.left() + 80 + (level * h), y), QPoint(rectPaint.right() - (rectPaint.width() / 3), y + h));
+		paint.drawText(rectText1, Qt::AlignVCenter | Qt::AlignLeft, item->text(0));
+		QRect rectText2(QPoint(rectPaint.right() - (rectPaint.width() / 3), y), QPoint(rectPaint.right(), y + h));
+		paint.drawText(rectText2, Qt::AlignVCenter | Qt::AlignLeft, item->text(1));
+		printer->setFullPage(false);
+		y += h;
+		if (y > rectPaint.bottom() - h - 50) {
+			printer->setFullPage(true);
+			y = rectPaint.top() + h;
+		}
+		++it;
+	}
+
+	printer->setFullPage(true);
+
+}
+
+void OffLineFuncControl::onSettings() {
+
+	QString sPath = QCoreApplication::applicationDirPath ();
+	QProcess::startDetached(sPath + "/SettingsARM.exe");
+}
+
+void OffLineFuncControl::onTestKS()
+{
+	QString sPath = QCoreApplication::applicationDirPath ();
+	QProcess::startDetached(sPath + "/Imitator_R181.exe");
+}
+\end{minted}
+\clearpage

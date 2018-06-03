@@ -1,0 +1,669 @@
+\setminted[c++]{fontfamily=tt,fontsize=\scriptsize,xleftmargin=0ex,breaklines=true,tabsize=4}
+\sectionadd*{ПРИЛОЖЕНИЕ Б}
+\addcontentsline{toc}{section}{ПРИЛОЖЕНИЕ Б}
+\label{sec:appendix_b}
+
+
+\begin{center}
+	\normalfont\normalsize{\textit{(обязательное)}}
+
+	\normalfont\normalsize{Листинг кода класса \texttt{VTest\_BINS3}}
+\end{center}
+
+\begin{minted}{c++}
+#include "VTest_BINS3.h"
+#include "StaticGlobalFunc.h"
+#include "qextserialport.h"
+#define CR "<br />"
+#include "Protocol_BINS3.h"
+#include <QHostAddress>
+#include "qdbloader.h"
+#include "CoordContain.h"
+#include "GeoConsts.h"
+
+#define ID_DEVICE_BINS3 12
+
+VTest_BINS3::VTest_BINS3(QObject *parent)
+	: QObject(parent)
+{
+	m_bReceiveMess01 = false;
+	m_bReceiveMess81 = false;
+	connect(&m_sockReceive, SIGNAL(readyRead()), SLOT(onReadFromSocket()));
+}
+
+VTest_BINS3::~VTest_BINS3()
+{
+
+}
+
+void VTest_BINS3::onReadFromBINS(QByteArray datagram)
+{
+	static QByteArray baRemain;
+	QByteArray baData = baRemain + datagram;
+	QList<QByteArray> listMess = Protocol_BINS3::unpackMess(baData, baRemain);
+
+	for (quint32 i = 0; i < listMess.size(); i++)
+	{
+		QByteArray baKdg = listMess.at(i);
+		Protocol_BINS3::_KDG kdg = Protocol_BINS3::unpackKDG(baKdg);
+
+		if (kdg.typeKDG == Protocol_BINS3::MESS_01)
+		{
+			m_mes01 = kdg.kdg01;
+			m_bReceiveMess01 = true;
+		}
+		else if (kdg.typeKDG == Protocol_BINS3::MESS_81)
+		{
+			m_mes81 = kdg.kdg81;
+			m_bReceiveMess81 = true;
+		}
+
+
+		if (m_bReceiveMess01 && m_bReceiveMess81)
+		{
+			emit signGetAllMessFromBINS();
+			break;
+		}
+
+	}
+}
+
+void VTest_BINS3::onReadFromSocket()
+{
+	while (m_sockReceive.hasPendingDatagrams())
+	 {
+         QByteArray datagram;
+         datagram.resize(m_sockReceive.pendingDatagramSize());
+         QHostAddress sender;
+         quint16 senderPort;
+
+         m_sockReceive.readDatagram(datagram.data(), datagram.size(),
+                                 &sender, &senderPort);
+		 if (m_bReceiveMess01 && m_bReceiveMess81)
+			 continue;
+		 onReadFromBINS(datagram);
+     }
+}
+
+
+quint8 VTest_BINS3::test(QString & sRez)
+{
+	sRez.clear();
+
+	sRez = "<b>" + getNameDevice(ID_DEVICE_BINS3) + "</b>";
+	sRez += CR;
+
+	_SETT_ARM sett;
+	if (!getSettARM(sett))
+	{
+		sRez += CR;
+		sRez += tr("Не заданы настройки подключения INS!");
+		return 10;
+	}
+	_IP_DEVICE device = sett.shemeLAN.value(ID_DEVICE_BINS3);
+	if (device.idDevice != ID_DEVICE_BINS3)
+	{
+		sRez += CR;
+		sRez += tr("Не заданы настройки подключения INS!");
+		return 10;
+	}
+
+
+
+	if (device.hashIP.size())
+	{
+		sRez += CR;
+		sRez += tr("<b>Параметры подключения: </b>");
+	}
+	else
+	{
+		sRez += CR;
+		sRez += tr("Параметры подключения: отсутствуют");
+		return 10;
+	}
+
+	QHashIterator<QString, QString> it(device.hashIP);
+
+	QString sIP;
+	while (it.hasNext())
+	{
+		it.next();
+		sRez += CR;
+		sRez += tr("%1: %2").arg(it.key()).arg(it.value());
+		sIP = it.value();
+
+	}
+
+
+	if (device.hashIP.size() > 1)
+	{
+		sRez += CR;
+		sRez += tr("Задано более одного IP-адреса подключения INS! Уточните настройки");
+		return 10;
+	}
+
+	bool bConn = true;
+
+	QHostAddress ipAddr;
+	bConn = ipAddr.setAddress(sIP);
+
+	if (bConn)
+	{
+		sIP = ipAddr.toString();
+		if (sIP != "192.168.1.30")
+			bConn = false;
+
+	}
+
+	if (!bConn)
+	{
+		sRez += CR;
+		sRez += tr("Задан неверный IP-адрес подключения INS! В соответствии с протоколом должен быть установлен IP-адрес 192.168.1.30");
+		return 10;
+	}
+
+
+	if (!m_sockReceive.bind(13001, QUdpSocket::ReuseAddressHint/*QUdpSocket::ShareAddress*/))
+	{
+		sRez += CR;
+		sRez += tr("Порт приема данных от INS 13001 занят!");
+		return 2;
+
+	}
+
+	ipAddr.setAddress("224.0.30.1");
+
+	if (!m_sockReceive.joinMulticastGroup(ipAddr))
+	{
+		sRez += CR;
+		sRez += tr("Не удалось подключиться к группе мультикастовых сообщений от INS (224.0.30.1)!");
+		return 2;
+	}
+
+	QEventLoop ev;
+
+	QTimer::singleShot(5000, &ev, SLOT(quit()));
+	connect(this, SIGNAL(signGetAllMessFromBINS()), &ev, SLOT(quit()));
+	ev.exec();
+
+
+	if (!m_bReceiveMess01)
+	{
+		sRez += CR;
+		sRez += tr("Не принято сообщение с навигационными данными от INS!");
+
+	}
+
+	if (!m_bReceiveMess81)
+	{
+		sRez += CR;
+		sRez += tr("Не принято сообщение со статусом от INS!");
+
+	}
+
+	if (!m_bReceiveMess81 || !m_bReceiveMess01)
+		return 1;
+
+
+	decodeMes01(sRez);
+
+	bool bIspr;
+	decodeMes81(bIspr, sRez);
+
+	if (!bIspr)
+		return 1;
+
+	return 0;
+}
+
+void VTest_BINS3::decodeMes01(QString & sRez)
+{
+	sRez += CR;
+	sRez += CR;
+	sRez += tr("<b>Навигационные данные:</b>");
+
+	sRez += CR;
+
+	bool bCoordGeo;
+	if(m_mes01.coord_system_notation == 0)
+		bCoordGeo = true; // tr("Географическая");
+	else
+		bCoordGeo = false; // tr("UTM");
+	QString sCoord;
+
+	if (bCoordGeo)
+	{
+		double koefRad = 1.0;
+
+		if (m_mes01.latitude_longitude_unit == 0) //tr("Радианы");
+			koefRad = 180.0/PI;
+
+		CCoordContain coord;
+		coord.SetCoord(m_mes01.latitude*360000.0*koefRad, m_mes01.longitude*360000.0*koefRad, false);
+		sCoord = coord.GetCoordStr();
+	}
+	else
+	{
+		QString sX = QString::number(m_mes01.longitude);
+		sX = sX.leftJustified(7, '0');
+
+		if (m_mes01.hemisphere == 1) //tr("Индекс полушария: ");
+			sX = "0" + sX; //tr("Северное полушарие");
+		else
+			sX = "1" + sX; //tr("Южное полушарие");
+
+
+		QString sY = QString::number(m_mes01.latitude);
+		sY = sY.leftJustified(6, '0');
+		sY = QString::number(m_mes01.zone).leftJustified(2, '0') + sY;
+
+		sCoord = QString("X: %1 Y: %2").arg(sX).arg(sY);
+	}
+
+	sCoord += QString(" H: %1").arg(m_mes01.height);
+
+	sRez += tr("Координаты: ");
+	sRez += sCoord;
+
+
+	sRez += CR;
+
+	QString sRazmUg = tr("градусы");
+	if(m_mes01.angle_unit == 1)
+		sRazmUg = tr("mils");
+
+	sRez += tr("Курсовой угол (%1): ").arg(sRazmUg);
+	sRez += QString::number(m_mes01.course_angle);
+
+	sRez += CR;
+
+	sRez += tr("Путевой угол (%1): ").arg(sRazmUg);
+	sRez += QString::number(m_mes01.travel_angle);
+
+	sRez += CR;
+
+	sRez += tr("Угол крена (%1): ").arg(sRazmUg);
+	sRez += QString::number(m_mes01.roll_angle);
+
+	sRez += CR;
+
+	sRez += tr("Угол тангажа (%1): ").arg(sRazmUg);
+	sRez += QString::number(m_mes01.pitch_angle);
+
+	sRez += CR;
+
+	sRez += tr("Модуль скорости (км/ч): ");
+	sRez += QString::number(m_mes01.speed);
+
+	sRez += CR;
+
+	QString sRazm;
+	if(m_mes01.route_unit == 1)
+		sRazm = tr("м");
+	else if(m_mes01.route_unit == 2)
+		sRazm = tr("км");
+	else
+		sRazm = tr("Футы");
+
+	sRez += tr("Пройденный путь (%1): ").arg(sRazm);
+	sRez += QString::number(m_mes01.way);
+
+	sRez += CR;
+
+	sRez += tr("СКП координат: ");
+	sRez += QString::number(m_mes01.koord_SKP);
+
+	sRez += CR;
+
+	sRez += tr("Геометрический фактор: ");
+	sRez += QString::number(m_mes01.geometry);
+
+	sRez += CR;
+
+	sRez += tr("Текущее время: ");
+	QDateTime time = QDateTime(QDate(m_mes01.year, m_mes01.month, m_mes01.day), QTime(m_mes01.hour, m_mes01.min, m_mes01.sec));
+	sRez += time.toString(FORMAT_DATETIME_LOC);
+
+	sRez += CR;
+
+	sRez += tr("Система координат(датумы): ");
+	if(m_mes01.coord_system == 0)
+		sRez += tr("WGS-84");
+	else
+		sRez += tr("WGS-72");
+
+	sRez += CR;
+
+	sRez += tr("Система отсчёта высоты: ");
+	if(m_mes01.height_system == 0)
+		sRez += tr("Над уровнем моря(Геоидом)");
+	else
+		sRez += tr("Над эллипсоидом");
+
+	sRez += CR;
+
+	sRez += tr("Единицы измерения высоты: ");
+	if(m_mes01.height_unit == 0)
+		sRez += tr("Метры");
+	else
+		sRez += tr("Футы");
+
+	sRez += CR;
+
+	sRez += tr("Получение текущих координат: ");
+	if(m_mes01.get_cur_coord == 0)
+		sRez += tr("Координаты не определены");
+	else if(m_mes01.get_cur_coord == 1)
+		sRez += tr("По СНС");
+	else
+		sRez += tr("По ИНС");
+
+	sRez += CR;
+
+	sRez += tr("Источник начальных координат: ");
+	if(m_mes01.start_coord_sourse == 0)
+		sRez += tr("Координаты не определены");
+	else if(m_mes01.start_coord_sourse == 1)
+		sRez += tr("СНС");
+	else
+		sRez += tr("Введены по команде");
+
+	sRez += CR;
+
+	sRez += tr("Достоверность СНС: ");
+	if(m_mes01.SNS_valid == 0)
+		sRez += tr("Данные не достоверны");
+	else
+		sRez += tr("Данные достоверны");
+
+	sRez += CR;
+
+	sRez += tr("Достоверность даты и времени: ");
+	if(m_mes01.datetime_valid == 0)
+		sRez += tr("Данные не достоверны");
+	else
+		sRez += tr("Данные достоверны");
+
+	sRez += CR;
+
+	sRez += tr("Достоверность текущих углов ориентации: ");
+	if(m_mes01.cur_orient_valid == 0)
+		sRez += tr("Данные не достоверны");
+	else
+		sRez += tr("Данные достоверны");
+
+	sRez += CR;
+
+	sRez += tr("Достоверность текущих координат: ");
+	if(m_mes01.cur_coord_valid == 0)
+		sRez += tr("Данные не достоверны");
+	else
+		sRez += tr("Данные достоверны");
+
+}
+void VTest_BINS3::decodeMes81(bool & bIspr, QString & sRez)
+{
+	bIspr = true;
+	sRez += CR;
+	sRez += CR;
+	sRez += tr("<b>Статус INS:</b>");
+
+	sRez += CR;
+
+	sRez += tr("Признак калибровки ДПЦ-2: ");
+	if(m_mes81.calibrate_DPC2 == 0)
+		sRez += tr("Не выполнена");
+	else
+		sRez += tr("Выполнена");
+
+	sRez += CR;
+
+	sRez += tr("Признак исправности ДПЦ-2: ");
+	if(m_mes81.order_DPC2 == 0)
+	{
+		sRez += tr("Не исправен");
+		bIspr = false;
+	}
+	else
+		sRez += tr("Исправен");
+
+	sRez += CR;
+
+	sRez += tr("Состояние питания ДПЦ-2: ");
+	if(m_mes81.power_DPC2 == 0)
+		sRez += tr("Выключено");
+	else
+		sRez += tr("Включено");
+
+	sRez += CR;
+
+	sRez += tr("Состояние ДПЦ-2: ");
+	if(m_mes81.status_DPC2 == 0)
+		sRez += tr("Не подключен");
+	else
+		sRez += tr("Подключен");
+
+	sRez += CR;
+
+	sRez += tr("Используемые спутники: ");
+	if(m_mes81.satellite == 1)
+		sRez += tr("GPS");
+	else if(m_mes81.satellite == 2)
+		sRez += tr("ГЛОНАСС");
+	else
+		sRez += tr("GPS/ГЛОНАСС");
+
+	sRez += CR;
+
+	sRez += tr("Наличие навигационного решения: ");
+	if(m_mes81.navigation_result == 0)
+		sRez += tr("Отсутствует");
+	else
+		sRez += tr("Есть");
+
+	sRez += CR;
+
+	sRez += tr("Признак исправности БИС-3: ");
+	if(m_mes81.order_BIS3 == 0)
+	{
+		sRez += tr("Не исправен");
+		bIspr = false;
+	}
+	else
+		sRez += tr("Исправен");
+
+	sRez += CR;
+
+	sRez += tr("Состояние питания БИС-3: ");
+	if(m_mes81.power_BIS3 == 0)
+		sRez += tr("Выключено");
+	else
+		sRez += tr("Включено");
+
+	sRez += CR;
+
+	sRez += tr("Состояние БИС-3: ");
+	if(m_mes81.statys_BIS3 == 0)
+		sRez += tr("Не подключен");
+	else
+		sRez += tr("Подключен");
+
+	sRez += CR;
+
+	sRez += tr("Обновление начального положения: ");
+	if(m_mes81.update_start_position == 0)
+		sRez += tr("Не выполняется");
+	else
+		sRez += tr("Выполняется");
+
+	sRez += CR;
+
+	sRez += tr("Предыдущее выключение питания INS: ");
+	if(m_mes81.last_roweroff_BINS3 == 0)
+		sRez += tr("Корректное");
+	else
+		sRez += tr("Не корректное");
+
+	sRez += CR;
+
+	sRez += tr("Срыв выставки: ");
+	if(m_mes81.indication_abort == 0)
+		sRez += tr("Не зафиксирован");
+	else
+		sRez += tr("Зафиксирован");
+
+	sRez += CR;
+
+	sRez += tr("Гирокомпасирование после включения: ");
+	if(m_mes81.power_gyrocompass == 0)
+		sRez += tr("Не выполнено");
+	else
+		sRez += tr("Выполнено");
+
+	sRez += CR;
+
+	sRez += tr("Готовность INS к решению навигационной задачи: ");
+	if(m_mes81.readiness_BINS3 == 0)
+		sRez += tr("Не готов");
+	else
+		sRez += tr("Готов");
+
+	sRez += CR;
+
+	sRez += tr("Юстировка INS: ");
+	if(m_mes81.adjusting_BINS3 == 0)
+		sRez += tr("Не проведена");
+	else
+		sRez += tr("Проведена");
+
+	sRez += CR;
+
+	sRez += tr("Режим навигации: ");
+	if(m_mes81.navigation_mode == 1)
+		sRez += tr("Спутниковый");
+	else if(m_mes81.navigation_mode == 2)
+		sRez += tr("Автономный");
+	else
+		sRez += tr("Совмещённый");
+
+	sRez += CR;
+
+	sRez += tr("Состояние режима 1: ");
+	if(m_mes81.state_mode1 == 0)
+		sRez += tr("Подготовка");
+	else if(m_mes81.state_mode1 == 1)
+		sRez += tr("Ожидание");
+	else if(m_mes81.state_mode1 == 2)
+		sRez += tr("Выставка методом гирокомпасирования");
+	else if(m_mes81.state_mode1 == 3)
+		sRez += tr("Выставка методом инициализации сохранёнными данными");
+	else if(m_mes81.state_mode1 == 4)
+		sRez += tr("Выставка методом инициализации введёнными данными");
+	else
+		sRez += tr("Навигация");
+
+	sRez += CR;
+
+	sRez += tr("Признак исправности INS: ");
+	if(m_mes81.order_BINS3 == 0)
+	{
+		sRez += tr("Не исправна");
+		bIspr = false;
+	}
+	else
+		sRez += tr("Исправна");
+
+	sRez += CR;
+
+	sRez += tr("Режим работы: ");
+	if(m_mes81.work_mode == 0)
+		sRez += tr("Режим 1");
+	else if (m_mes81.work_mode == 1)
+		sRez += tr("Режим 2");
+	else if (m_mes81.work_mode == 2)
+		sRez += tr("Режим 3");
+
+	sRez += CR;
+
+	sRez += tr("Время до завершения операции: ");
+	sRez += QString::number(m_mes81.end_time);
+
+	sRez += CR;
+
+	sRez += tr("Неисправность ДПЦ-2: ");
+	if(m_mes81.defect_DPC2 == 0)
+		sRez += tr("Нет");
+	else
+	{
+		sRez += tr("Да");
+		bIspr = false;
+	}
+
+	sRez += CR;
+
+	sRez += tr("Неисправность БИС-3: ");
+	if(m_mes81.defect_BIS3 == 0)
+		sRez += tr("Нет");
+	else
+	{
+		sRez += tr("да");
+		bIspr = false;
+	}
+
+	sRez += CR;
+
+	sRez += tr("Неисправность блока питания: ");
+	if(m_mes81.defect_power == 0)
+		sRez += tr("Нет");
+	else
+	{
+		sRez += tr("Да");
+		bIspr = false;
+	}
+
+	sRez += CR;
+
+	sRez += tr("Неисправновсть канала X гироскопа: ");
+	if(m_mes81.defect_Xchannel == 0)
+		sRez += tr("Нет");
+	else
+	{
+		sRez += tr("Да");
+		bIspr = false;
+	}
+
+	sRez += CR;
+
+	sRez += tr("Неисправновсть канала Y гироскопа: ");
+	if(m_mes81.defect_Ychannel == 0)
+		sRez += tr("Нет");
+	else
+	{
+		sRez += tr("Да");
+		bIspr = false;
+	}
+
+	sRez += CR;
+
+	sRez += tr("Неисправновсть канала Z гироскопа: ");
+	if(m_mes81.defect_Zchannel == 0)
+		sRez += tr("Нет");
+	else
+	{
+		sRez += tr("Да");
+		bIspr = false;
+	}
+
+	sRez += CR;
+
+	sRez += tr("Неисправновсть блока акселерометров: ");
+	if(m_mes81.defect_acceler == 0)
+		sRez += tr("Нет");
+	else
+	{
+		sRez += tr("Да");
+		bIspr = false;
+	}
+}
+\end{minted}
+\clearpage
