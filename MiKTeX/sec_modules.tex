@@ -468,3 +468,165 @@ void Journal::store(JournalEntry journalEntry)
 тестах, проведенных за соответствующий месяц. В случае наличия файла с результатами предыдущих тестов за текущий месяц
 результаты текущего теста добавляются к массиву со всеми записями за месяц. В случае отсутствия файла с предыдущими
 записями происходит создание нового файла и добавление в него данных.
+
+\subsection{Программа просмотра содержимого журнала}
+Данная программа служит для просмотра журнала. Для фильтрации выводимой на экран информации существуют фильтры по дате,
+степени детализации информации, типу устройств. Информация выводится на экран в виде таблицы, возможность вывода на
+печать также присутствует.
+
+Рассмотрим подробнее работу данной программы.
+
+Метод \texttt{readJSON} осуществляет чтение данных из журнала тестирования. Прототип метода представлен ниже.
+\medskip
+\begin{minted}{c++}
+void Journal::readJSON()
+\end{minted}
+\medskip
+
+Рассмотри работу данного метода.
+\medskip
+\begin{minted}{c++}
+QDir dir(qApp->applicationDirPath());
+dir.cd("Journal");
+dir.cd("data");
+dir.setFilter(QDir::Files | QDir::NoSymLinks);
+QStringList filters;
+filters << "*.json";
+dir.setNameFilters(filters);
+dir.setSorting(QDir::Time);
+QFileInfoList fileList = dir.entryInfoList();
+\end{minted}
+\medskip
+
+Метод получает путь к рабочему каталогу приложения, после этого осуществляется переход в директорию
+\texttt{Journal/data}, в которой находятся файлы журнала в формате JSON. После этого к директории применяется фильтр,
+который служит для отсеивания файлов, не относящихся к журналу (не имеющих расширения \texttt{.json}). После этого
+происходит сортировка файлов по времени создания и получение списка файлов.
+
+\medskip
+\begin{minted}{c++}
+for(int i = 0; i < fileList.size(); i++)
+{
+	QFile JSONfile;
+	QFileInfo fileInfo = fileList.at(i);
+	JSONfile.setFileName(fileInfo.absoluteFilePath());
+
+	JSONfile.open(QIODevice::ReadOnly | QIODevice::Text);
+	JSON newDate;
+	JSONdevice newDevice;
+	QString line;
+	bool nextDate = false;
+	QTextStream jsonIn(&JSONfile);
+	jsonIn.setCodec(QTextCodec::codecForName("UTF8"));
+\end{minted}
+\medskip
+
+Происходит проход по списку файлов журнала. Выполняется открытие файла в кодировке UTF-8. Для хранения данных, которые
+будут получены в ходе парсинга, используются структуры \texttt{JSON} и \texttt{JSONdevice}.
+\medskip
+\begin{minted}{c++}
+		while (!jsonIn.atEnd())
+		{
+			line = jsonIn.readLine();
+			if(line.contains("date"))
+			{
+				if(nextDate)
+				{
+					devices << newDate;
+					newDate.device.clear();
+				}
+				newDate.timeTest = QDateTime::fromString(line.mid(9,19), "yyyy-MM-dd HH:mm:ss");
+				nextDate = true;
+			}
+			else if(line.contains("name"))
+			{
+				int n = line.indexOf("result");
+				newDevice.deviceName = line.mid(10, n - 14);
+				if(line.contains("false"))
+				{
+					newDevice.result = true;
+
+				}
+				else
+				{
+					newDevice.result = false;
+
+				}
+				int k = line.indexOf("info");
+				n = line.indexOf("hasError");
+				newDevice.info = line.mid(k+7, n-k-11);
+				newDevice.info.replace("),", ")");
+				newDevice.info.replace("\\n","<br />");
+				newDevice.infoDialog = newDevice.info;
+				newDevice.info.replace("<br />", " ");
+				newDevice.info.remove("<b>");
+				newDevice.info.remove("</b>");
+
+				newDate.device << newDevice;
+			}
+		}
+		devices << newDate;
+		int n = devices.size();
+		JSONfile.close();
+	}
+	addFilterDevices();
+}
+\end{minted}
+\medskip
+
+Чтение файла происходит построчно.
+Если строка содержит информацию о времени тестирования, происходит добавление предыдущей
+записи о времени к списку устройств и формирование новой записи о времени тестирования. Такое поведение вызвано тем, что
+временная информация предшествует списку устройств. Если получена информация о результатах тестирования устройств, то
+происходит запись полученных данных в структуру \texttt{newDevice}. В структуру сохраняется имя устройства, основная и
+дополнительная информация о результатах тестирования. Информация о наличии ошибок в ходе тестирования также добавляется
+в структуру. Сформированная структура добавляется в список устройств \texttt{device} структуры \texttt{newDate}.
+
+После чтения файла происходит добавление полученных данных к списку записей \texttt{devices}.
+
+После чтения всех элементов журнала происходит фильтрация полученных данных с помощью вызова метода
+\texttt{addFilterDevices}.
+
+Метод \texttt{addFilterDevices} осуществляет формирование фильтра\break устройств. Данный список формируется из перечня типов
+протестированных устройств.
+
+Данный метод
+имеет следующий прототип.
+\medskip
+\begin{minted}{c++}
+void Journal::addFilterDevices()
+\end{minted}
+\medskip
+
+Рассмотрим работу данного метода.
+\medskip
+\begin{minted}{c++}
+void Journal::addFilterDevices()
+{
+	for(int i = 0; i<devices.size(); i++)
+		for(int j=0; j<devices[i].device.size(); j++)
+		{
+			if(!containsLFD(
+				devices[i].device[j].deviceName))
+			{
+				ListFilterDevices newDevice;
+				newDevice.deviceName = devices[i].device[j].deviceName;
+				newDevice.select = false;
+				QCheckBox *newCaseCheckBox;
+				newCaseCheckBox = new QCheckBox(
+					devices[i].device[j].deviceName);
+				newCaseCheckBox->setEnabled(false);
+				ui.verticalLayout_3->
+					addWidget(newCaseCheckBox);
+				newDevice.caseCheckBox = newCaseCheckBox;
+				LFD.push_back(newDevice);
+			}
+		}
+}
+\end{minted}
+\medskip
+
+Метод осуществляет проход по списку устройств. На каждой итерации цикла происходит проверка наличия текущего устройства в
+списке фильтров. В случае наличия данного устройства в списке фильтров, добавление устройства в список устройств
+фильтра не производится. При отсутствии устройства в списке происходит добавление данного устройства в фильтр с
+созданием соответствующего чекбокса.
