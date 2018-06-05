@@ -46,7 +46,6 @@ for (quint8 i = 0; i < groups.size(); i++) {
 	pItemGroup->setData(0, Qt::UserRole, Qt::Checked);
 	pItemGroup->setData(1, Qt::UserRole, 0);
 
-
 	pItemGroup->setHidden(true);
 }
 \end{minted}
@@ -333,8 +332,6 @@ void QTestPrinter::print(QPrinter * printer)
   QFont font = paint.font();
   font.setPointSize(16);
   paint.setFont(font);
-
-
 
   qreal left, top, right, bottom;
 
@@ -630,3 +627,107 @@ void Journal::addFilterDevices()
 списке фильтров. В случае наличия данного устройства в списке фильтров, добавление устройства в список устройств
 фильтра не производится. При отсутствии устройства в списке происходит добавление данного устройства в фильтр с
 созданием соответствующего чекбокса.
+
+%\medskip
+%\begin{minted}{c++}
+%void Journal::result()
+%{
+	%ui.tableWidget_JSON->setRowCount(0);
+	%ui.tableWidget_JSON->setColumnCount(0);
+	%quint8 success = 0;
+
+	%QList<QString> checkDevices;
+
+	%if(!ui.checkBoxAllDevices->checkState())
+	%{
+		%for(int i = 0; i < LFD.size(); i++)
+			%if(LFD[i].caseCheckBox->checkState())
+				%checkDevices.push_back(LFD[i].deviceName);
+	%}
+
+	%for(int i = 0; i < devices.size(); i++)
+	%{
+		%if(devices[i].timeTest >= ui.dateTimeEdit_since->dateTime() && devices[i].timeTest <= ui.dateTimeEdit_to->dateTime())
+		%{
+			%if(!success)
+				%success = 1;
+			%for(int j = 0; j < devices[i].device.size(); j++)
+			%{
+				%if(((ui.checkBox_showServiceable->checkState() && !devices[i].device[j].result) || !ui.checkBox_showServiceable->checkState()) && (!checkDevices.size() || checkDevices.contains(devices[i].device[j].deviceName)) && !(!ui.checkBoxAllDevices->checkState() && !checkDevices.size()))
+				%{
+					%if(success != 3)
+					%{
+						%ui.tableWidget_JSON->insertColumn(0);
+						%ui.tableWidget_JSON->setHorizontalHeaderItem(0, new QTableWidgetItem(tr("Время провидения тестирования")));
+						%ui.tableWidget_JSON->insertColumn(1);
+						%ui.tableWidget_JSON->setHorizontalHeaderItem(1, new QTableWidgetItem(tr("Устройство")));
+						%ui.tableWidget_JSON->insertColumn(2);
+						%ui.tableWidget_JSON->setHorizontalHeaderItem(2, new QTableWidgetItem(tr("Результат тестирования")));
+						%if(ui.checkBox_info->checkState())
+						%{
+							%ui.tableWidget_JSON->insertColumn(3);
+							%ui.tableWidget_JSON->setHorizontalHeaderItem(3, new QTableWidgetItem(tr("Дополнительная информация")));
+							%ui.tableWidget_JSON->horizontalHeader()->resizeSection(0, 260);
+							%ui.tableWidget_JSON->horizontalHeader()->resizeSection(1, 260);
+							%ui.tableWidget_JSON->horizontalHeader()->resizeSection(2, 190);
+							%ui.tableWidget_JSON->horizontalHeader()->setResizeMode(3, QHeaderView::Stretch);
+						%}
+						%else
+						%{
+							%ui.tableWidget_JSON->horizontalHeader()->setResizeMode(0, QHeaderView::Stretch);
+							%ui.tableWidget_JSON->horizontalHeader()->setResizeMode(1, QHeaderView::Stretch);
+							%ui.tableWidget_JSON->horizontalHeader()->setResizeMode(2, QHeaderView::Stretch);
+						%}
+					%}
+					%ui.tableWidget_JSON->insertRow(ui.tableWidget_JSON->rowCount());
+					%devices[i].device[j].idInTable = ui.tableWidget_JSON->rowCount() - 1;
+					%QTableWidgetItem *item = new QTableWidgetItem;
+					%item->setText(devices[i].timeTest.toString("yyyy-MM-dd HH:mm:ss"));
+					%item->setFlags(Qt::ItemIsSelectable|Qt::ItemIsEnabled);
+					%item->setTextAlignment(Qt::AlignCenter);
+					%ui.tableWidget_JSON->setItem(ui.tableWidget_JSON->rowCount()-1, 0, item);
+					%QTableWidgetItem *item2 = new QTableWidgetItem;
+					%item2->setText(devices[i].device[j].deviceName);
+					%item2->setFlags(Qt::ItemIsSelectable|Qt::ItemIsEnabled);
+					%item2->setTextAlignment(Qt::AlignCenter);
+					%ui.tableWidget_JSON->setItem(ui.tableWidget_JSON->rowCount()-1, 1, item2);
+					%QTableWidgetItem *item3 = new QTableWidgetItem;
+					%if(devices[i].device[j].result)
+						%item3->setText(tr("Исправно"));
+					%else
+					%{
+						%item3->setText(tr("Неисправно"));
+						%item3->setData(Qt::TextColorRole, Qt::red);
+					%}
+					%item3->setTextAlignment(Qt::AlignCenter);
+					%item3->setFlags(Qt::ItemIsSelectable|Qt::ItemIsEnabled);
+					%ui.tableWidget_JSON->setItem(ui.tableWidget_JSON->rowCount()-1, 2, item3);
+					%if(ui.checkBox_info->checkState())
+					%{
+						%QTableWidgetItem *item4 = new QTableWidgetItem;
+						%item4->setText(devices[i].device[j].info);
+						%item4->setFlags(Qt::ItemIsSelectable|Qt::ItemIsEnabled);
+						%item4->setTextAlignment(Qt::AlignCenter);
+						%ui.tableWidget_JSON->setItem(ui.tableWidget_JSON->rowCount()-1, 3, item4);
+					%}
+					%success = 3;
+				%}
+				%else
+					%devices[i].device[j].idInTable = -1;
+			%}
+		%}
+	%}
+	%if(success == 0)
+	%{
+		%QMessageBox::information(0, tr("Нет данных"), tr("Нет тестов за указанный промежуток времени"));
+	%}
+	%else if(success == 1)
+	%{
+		%if(!ui.checkBoxAllDevices->checkState() && !checkDevices.size())
+			%QMessageBox::information(0, tr("Нет данных"), tr("Не выбрано ни одного устройства"));
+		%else
+			%QMessageBox::information(0, tr("Нет данных"), tr("Нет неисправных устройств в тестах за указанный промежуток времени"));
+	%}
+%}
+%\end{minted}
+%\medskip
