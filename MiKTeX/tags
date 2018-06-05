@@ -11,20 +11,29 @@ DIPLOMA_REPORT_PDF	Makefile	/^DIPLOMA_REPORT_PDF = diploma_report$/;"	m
 DROPBOX_PUBLIC	Makefile	/^	DROPBOX_PUBLIC=$(HOME)\/Dropbox\/Public$/;"	m
 DROPBOX_PUBLIC	Makefile	/^	DROPBOX_PUBLIC=$(USERPROFILE)\/Dropbox\/Public$/;"	m
 ECONOMICS_REPORT_PDF	Makefile	/^ECONOMICS_REPORT_PDF = economics_report$/;"	m
+FEEDBACK_REPORT_PDF	Makefile	/^FEEDBACK_REPORT_PDF = feedback_report$/;"	m
+GDB	sec_test.tex	/^\\end{itemize}$/;"	b
 GREP	Makefile	/^GREP = grep$/;"	m
 Netica	sec_domain.tex	/^Но функциональность, обеспечивающая автоматический вывод структуры сети по данным, отсутствует.$/;"	b
-PDFLATEX	Makefile	/^PDFLATEX = pdflatex$/;"	m
 PRACTICE_REPORT_PDF	Makefile	/^PRACTICE_REPORT_PDF = practice_report$/;"	m
 RM	Makefile	/^RM = rm -f$/;"	m
 SHELL	Makefile	/^	SHELL=%WINDIR%\/cmd.exe$/;"	m
 SHELL	Makefile	/^	SHELL=\/usr\/bin\/env sh$/;"	m
 TASK_PDF	Makefile	/^TASK_PDF = diploma_task_only$/;"	m
 TITLE_PDF	Makefile	/^TITLE_PDF = diploma_title_only$/;"	m
+Valgrind	sec_test.tex	/^данных через указатель после освобождения памяти, формированием неправильных выходных данных алгоритмами.$/;"	b
+XELATEX	Makefile	/^XELATEX = lualatex --shell-escape$/;"	m
 clearpage startsection section	preamble.tex	/^\\renewcommand\\section{%$/;"	s
 fsharp	sec_tech.tex	/^Ключевым словом \\lstinline[style=csharpinlinestyle]!async! помечаются методы и лямбда"=выражения, которые внутри содержат ожидание выполнения асинхронных операций с помощью оператора \\lstinline[style=csharpinlinestyle]!await!, который отвечает за преобразования кода метода во время компиляции.$/;"	b
 startsection subsection	preamble.tex	/^\\renewcommand\\subsection{%$/;"	b
 startsection subsubsection	preamble.tex	/^\\renewcommand\\subsubsection{$/;"	b
+texttt DeviceInfo	sec_func.tex	/^\\end{minted}$/;"	b
+texttt Journal	sec_func.tex	/^\\end{enum}$/;"	b
+texttt JournalEntry	sec_func.tex	/^\\end{enum}$/;"	b
+texttt OffLineFuncControl	sec_func.tex	/^\\end{enum}$/;"	b
 texttt QTestPrinter	sec_func.tex	/^\\label{sec:func}$/;"	b
-texttt VTest _BINS3	sec_func.tex	/^\\end{itemize}$/;"	b
-texttt VTest _KNS2	sec_func.tex	/^\\end{itemize}$/;"	b
-texttt VTest _MNSTO	sec_func.tex	/^\\end{itemize}$/;"	b
+texttt VTest _BINS3	sec_func.tex	/^\\end{enum}$/;"	b
+texttt VTest _GPS	sec_func.tex	/^\\end{enum}$/;"	b
+texttt VTest _Kaponir	sec_func.tex	/^\\end{enum}$/;"	b
+texttt VTest _MeteoWXT520	sec_func.tex	/^\\end{enum}$/;"	b
+texttt VTest _R181	sec_func.tex	/^\\end{enum}$/;"	b
