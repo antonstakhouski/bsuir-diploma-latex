@@ -14,10 +14,9 @@
 Данный модуль управляет процессом тестирования всех подключенных устройств, поэтому рассмотрение работы данного модуля
 представляет особый интерес.
 Работа модуля начинается с составления дерева подключенных устройств. Для этого используется функция
-\texttt{loadDevices}, которая вызывается в процессе работы конструктора объекта класса\break \texttt{OfflineFuncControl}.
+\texttt{loadDevices}, которая вызывается в процессе работы конструктора \texttt{OfflineFuncControl}.
 Данная функция сначала производит формирование групп подключенных устройств.
-
-\medskip
+%\medskip
 \begin{minted}{c++}
 m_pTreeDevice->clear();
 
@@ -33,9 +32,11 @@ for (quint8 i = 0; i < groups.size(); i++) {
 
 	QFont f = pItemGroup->font(0);
 	f.setBold(true);
+
 	pItemGroup->setFont(0, f);
 	pItemGroup->setText(0, groupName);
 	pItemGroup->setSizeHint(0, QSize(0, 32));
+
 	m_pTreeDevice->insertTopLevelItem(0, pItemGroup);
 	pItemGroup->setExpanded(true);
 	Qt::ItemFlags flags = pItemGroup->flags();
@@ -45,7 +46,6 @@ for (quint8 i = 0; i < groups.size(); i++) {
 	pItemGroup->setCheckState(0, Qt::Checked);
 	pItemGroup->setData(0, Qt::UserRole, Qt::Checked);
 	pItemGroup->setData(1, Qt::UserRole, 0);
-
 	pItemGroup->setHidden(true);
 }
 \end{minted}
@@ -64,6 +64,7 @@ for (quint8 i = 0; i < groups.size(); i++) {
 \begin{minted}{c++}
 if (m_bStartTest)
 	return;
+
 m_bStartTest = true;
 m_pBtStart->setEnabled(false);
 m_pBtPrint->setEnabled(false);
@@ -217,6 +218,7 @@ switch (deviceId)
 \begin{minted}{c++}
 DeviceInfo deviceInfo;
 deviceInfo.deviceName = sNameDevice;
+
 QString sRezSaved = sRez;
 sRezSaved.replace("\r\n", CR);
 sRezSaved.replace("\"", "\\\"");
@@ -274,7 +276,6 @@ else if (rez == 3)
 \medskip
 \begin{minted}{c++}
 	saveRezTest(sNameDevise, deviceInfo.resultMessage, rez);
-
 	journalEntry.addDevice(deviceInfo);
 	++it;
 }
@@ -371,7 +372,6 @@ for (quint32 i = 0; i < listMess.size(); i++)
 		m_bReceiveMess81 = true;
 	}
 
-
 	if (m_bReceiveMess01 && m_bReceiveMess81)
 	{
 		emit signGetAllMessFromBINS();
@@ -390,31 +390,72 @@ for (quint32 i = 0; i < listMess.size(); i++)
 соответствующую структуру, используемую при дальнейшем анализе. При получении сообщений двух типов происходит генерация
 сигнала \texttt{signGetAllMessFromBINS}. Данный сигнал прерывает \texttt{QEventLoop}.
 
+Метод \texttt{onReadFromSocket} используется для чтения данных из сокета. Метод вызывается при генерации сокетом сигнала
+\texttt{readyRead}.
+\medskip
+\begin{minted}{c++}
+void VTest_BINS3::onReadFromSocket()
+{
+	while (m_sockReceive.hasPendingDatagrams())
+	 {
+		 QByteArray datagram;
+		 datagram.resize(
+			 m_sockReceive.pendingDatagramSize());
+
+		 QHostAddress sender;
+		 quint16 senderPort;
+
+		 m_sockReceive.readDatagram(datagram.data(), datagram.size(),
+					 &sender, &senderPort);
+
+		 if (m_bReceiveMess01 && m_bReceiveMess81)
+			 continue;
+
+		 onReadFromBINS(datagram);
+	}
+}
+\end{minted}
+\medskip
+
+Метод читает дейтаграммы из сокета. Если еще не были получены оба типа сообщений, происходит вызов метода
+\texttt{onReadFromBINS} для анализа типа полученных дейтаграмм.
+
 Методы \texttt{decodeMes81} и \texttt{decodeMes01} служат для анализа сообщений статуса и сообщений с навигационными
 данными соответственно.
 \medskip
 \begin{minted}{c++}
 void VTest_BINS3::decodeMes81(bool & bIspr, QString & sRez)
 {
-bIspr = true;
-sRez += CR;
-sRez += CR;
-sRez += tr("<b>Статус INS:</b>");
+	bIspr = true;
+	sRez += CR;
+	sRez += CR;
+	sRez += tr("<b>Статус INS:</b>");
+	sRez += CR;
 
-sRez += CR;
+	sRez += tr("Признак калибровки ДПЦ-2: ");
+	if(m_mes81.calibrate_DPC2 == 0)
+		sRez += tr("Не выполнена");
+	else
+		sRez += tr("Выполнена");
+	sRez += CR;
 
-sRez += tr("Признак калибровки ДПЦ-2: ");
-if(m_mes81.calibrate_DPC2 == 0)
-	sRez += tr("Не выполнена");
-else
-	sRez += tr("Выполнена");
-
-sRez += CR;
+	sRez += tr("Признак исправности ДПЦ-2: ");
+	if(m_mes81.order_DPC2 == 0)
+	{
+		sRez += tr("Не исправен");
+		bIspr = false;
+	}
+	else
+		sRez += tr("Исправен");
+	sRez += CR;
 \end{minted}
 \medskip
 
 Метод \texttt{decodeMes81} производит анализ полей сообщения статуса. Вся полученная информация сохраняется для
 последующей записи в журнал.
+
+Получение информации о состоянии устройства и текущих навигационных данных производится с помощью анализа соответствующих
+полей сообщений.
 
 Работа метода \texttt{decodeMes01}, анализирующего сообщения с навигационными данными, аналогична методу
 \texttt{decodeMes81}, за исключением\break необходимости преобразования координат в удобную для чтения форму.
@@ -491,10 +532,10 @@ void QTestPrinter::print(QPrinter * printer)
 	  font.setPointSize(pointSize);
 	  paint.setFont(font);
 	  paint.drawText(rectText, Qt::AlignVCenter | Qt::AlignLeft, ID_FUNC9);
+
 	  y += rectPaint.height()/15;
 	  pointSize -= 2;
 	  printer->setFullPage(false);
-
   }
 
   printer->setFullPage(true);
@@ -547,7 +588,6 @@ quint8 QTestARM::test(quint8 idDevice, QString & sRez) {
 
 		if (rez1)
 			rez = rez1;
-
 	}
 
 	return rez;
@@ -583,10 +623,12 @@ void Journal::store(JournalEntry journalEntry)
 		inStream.setCodec("UTF-8");
 		QString jsonArray = inStream.readAll();
 		file.close();
+
 		QString jsonJournalEntry = asJSON(journalEntry);
 		appendEntryToArray(jsonArray, jsonJournalEntry);
 		file.open(QIODevice::WriteOnly);
 		QTextStream outStream(&file);
+
 		outStream.setCodec("UTF-8");
 		outStream << jsonArray;
 		outStream.flush();
@@ -615,15 +657,17 @@ void Journal::readJSON()
 \end{minted}
 \medskip
 
-Рассмотри работу данного метода.
+Рассмотрим работу данного метода.
 \medskip
 \begin{minted}{c++}
 QDir dir(qApp->applicationDirPath());
 dir.cd("Journal");
 dir.cd("data");
+
 dir.setFilter(QDir::Files | QDir::NoSymLinks);
 QStringList filters;
 filters << "*.json";
+
 dir.setNameFilters(filters);
 dir.setSorting(QDir::Time);
 QFileInfoList fileList = dir.entryInfoList();
@@ -642,10 +686,10 @@ for(int i = 0; i < fileList.size(); i++)
 	QFile JSONfile;
 	QFileInfo fileInfo = fileList.at(i);
 	JSONfile.setFileName(fileInfo.absoluteFilePath());
-
 	JSONfile.open(QIODevice::ReadOnly | QIODevice::Text);
 	JSON newDate;
 	JSONdevice newDevice;
+
 	QString line;
 	bool nextDate = false;
 	QTextStream jsonIn(&JSONfile);
@@ -686,6 +730,7 @@ for(int i = 0; i < fileList.size(); i++)
 				}
 				int k = line.indexOf("info");
 				n = line.indexOf("hasError");
+
 				newDevice.info = line.mid(k+7, n-k-11);
 				newDevice.info.replace("),", ")");
 				newDevice.info.replace("\\n","<br />");
@@ -744,12 +789,14 @@ void Journal::addFilterDevices()
 				ListFilterDevices newDevice;
 				newDevice.deviceName = devices[i].device[j].deviceName;
 				newDevice.select = false;
+
 				QCheckBox *newCaseCheckBox;
 				newCaseCheckBox = new QCheckBox(
 					devices[i].device[j].deviceName);
 				newCaseCheckBox->setEnabled(false);
 				ui.verticalLayout_3->
 					addWidget(newCaseCheckBox);
+
 				newDevice.caseCheckBox = newCaseCheckBox;
 				LFD.push_back(newDevice);
 			}
@@ -779,7 +826,6 @@ void Journal::result()
 ui.tableWidget_JSON->setRowCount(0);
 ui.tableWidget_JSON->setColumnCount(0);
 quint8 success = 0;
-
 QList<QString> checkDevices;
 
 if(!ui.checkBoxAllDevices->checkState())
@@ -859,11 +905,13 @@ if(success != 3)
 \begin{minted}{c++}
 ui.tableWidget_JSON->insertRow(ui.tableWidget_JSON->rowCount());
 devices[i].device[j].idInTable = ui.tableWidget_JSON->rowCount() - 1;
+
 QTableWidgetItem *item = new QTableWidgetItem;
 item->setText(devices[i].timeTest.toString("yyyy-MM-dd HH:mm:ss"));
 item->setFlags(Qt::ItemIsSelectable|Qt::ItemIsEnabled);
 item->setTextAlignment(Qt::AlignCenter);
 ui.tableWidget_JSON->setItem(ui.tableWidget_JSON->rowCount()-1, 0, item);
+
 QTableWidgetItem *item2 = new QTableWidgetItem;
 item2->setText(devices[i].device[j].deviceName);
 item2->setFlags(Qt::ItemIsSelectable|Qt::ItemIsEnabled);
@@ -886,6 +934,7 @@ else
 	item3->setText(tr("Неисправно"));
 	item3->setData(Qt::TextColorRole, Qt::red);
 }
+
 item3->setTextAlignment(Qt::AlignCenter);
 item3->setFlags(Qt::ItemIsSelectable|Qt::ItemIsEnabled);
 ui.tableWidget_JSON->setItem(ui.tableWidget_JSON->rowCount()-1, 2, item3);
