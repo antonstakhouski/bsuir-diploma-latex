@@ -72,7 +72,7 @@
 % Зачем: Настраивает отступ между таблицей с содержанимем и словом СОДЕРЖАНИЕ
 % Почему: Пункт 2.2.7 Требований по оформлению пояснительной записки.
 \usepackage{tocloft}
-\setlength{\cftbeforetoctitleskip}{-3em}
+\setlength{\cftbeforetoctitleskip}{-1em}
 \setlength{\cftaftertoctitleskip}{1em}
 
 
@@ -80,6 +80,7 @@
 % Почему: Пункт 2.2.7 Требований по оформлению пояснительной записки.
 \makeatletter
 \renewcommand{\l@section}{\@dottedtocline{1}{0.5em}{1.2em}}
+\newcommand{\l@appendix}{\@dottedtocline{2}{0.5em}{1.2em}}
 \renewcommand{\l@subsection}{\@dottedtocline{2}{1.7em}{2.0em}}
 \makeatother
 
@@ -150,7 +151,7 @@
 % Приложения к записке
 \makeatletter
 \newcommand\sectionadd{%
-  \clearpage\@startsection {section}{1}%
+  \clearpage\@startsection {subsection}{1}%
     {\z@}%
     {-1em \@plus -1ex \@minus -.2ex}%
     {1sp \@plus .1em}%
@@ -507,3 +508,9 @@
 \usemintedstyle{bw}
 
 \setlength{\belowcaptionskip}{-10pt}
+
+%\setlength{\textfloatsep}{0.1cm}
+ %\setlength{\intextsep}{6pt}
+ %\makeatletter
+%\preto{\@tabular}{\parskip=0pt}
+%\makeatother

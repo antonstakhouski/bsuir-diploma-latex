@@ -12,6 +12,7 @@ DIPLOMA_REPORT_PDF = diploma_report
 PRACTICE_REPORT_PDF = practice_report
 ECONOMICS_REPORT_PDF = economics_report
 FEEDBACK_REPORT_PDF = feedback_report
+REVIEW_REPORT_PDF = review_report
 COURSE_REPORT_PDF = course_report
 TITLE_PDF = diploma_title_only
 TASK_PDF = diploma_task_only
@@ -49,6 +50,9 @@ $(DIPLOMA_REPORT_PDF).pdf: *.tex
 
 $(FEEDBACK_REPORT_PDF).pdf: *.tex
 	$(XELATEX) $(FEEDBACK_REPORT_PDF)
+
+$(REVIEW_REPORT_PDF).pdf: *.tex
+	$(XELATEX) $(REVIEW_REPORT_PDF)
 
 $(ECONOMICS_REPORT_PDF).pdf: *.tex
 	$(XELATEX) $(ECONOMICS_REPORT_PDF)

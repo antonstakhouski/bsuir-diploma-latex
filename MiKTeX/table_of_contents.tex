@@ -5,6 +5,7 @@
 \renewcommand\contentsname{\hfill СОДЕРЖАНИЕ \hfill}
 \renewcommand\cfttoctitlefont{\normalfont\normalsize}% use "\bfseries" if you want it in bold
 \renewcommand{\cftaftertoctitle}{\hfil}
+%\setlength\cftbeforetoctitleskip{0.2cm}
 
 \def\formatsection{\MakeUppercase}
 
@@ -17,9 +18,9 @@
     \expandafter\@secondoftwo
   \fi
   {%
-    \oldcontentsline{#1}{\MakeTextUppercase{#2}}%
+	  \oldcontentsline{#1}{\MakeUppercase{#2}}%
   }{%
-    \oldcontentsline{#1}{#2}%
+	\oldcontentsline{#1}{#2}%
   }%
 }
 \makeatother
