@@ -22,8 +22,8 @@ GREP = grep
 
 
 #all: $(DIPLOMA_REPORT_PDF).pdf $(PRACTICE_REPORT_PDF).pdf $(TITLE_PDF).pdf $(TASK_PDF).pdf
-all: $(DIPLOMA_REPORT_PDF).pdf
-#all: $(ECONOMICS_REPORT_PDF).pdf
+#all: $(DIPLOMA_REPORT_PDF).pdf
+all: $(REVIEW_REPORT_PDF).pdf
 
 
 publish_to_dropbox: all
