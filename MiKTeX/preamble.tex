@@ -2,12 +2,26 @@
 % Зачем: Определяет класс документа (То, как будет выглядеть документ)
 % Примечание: параметр draft помечает строки, вышедшие за границы страницы, прямоугольником, в фильной версии его нужно удалить.
 \documentclass[a4paper,14pt,russian,oneside,final]{extreport}
+%\documentclass[a4paper,14pt,russian,oneside,final]{report}
 
 % Для мультиязыковой поддержки
 \usepackage{polyglossia}
 
-% Зачем: Чтобы можно было использовать русские буквы в формулах, но в случае использования предупреждать об этом.
-\usepackage[warn]{mathtext}
+% Установка язков
+\setdefaultlanguage{russian}
+\setmainlanguage{russian}
+\setotherlanguage{english}
+
+% Лигатуры нужны для правильного отображения тире, кавычек и прочего
+\setmainfont[Ligatures=TeX]{Times New Roman}
+\setmonofont[Ligatures=TeX]{Courier New}
+
+% Необходимо для киррилических шрифтов
+\newfontfamily{\cyrillicfont}[Ligatures=TeX]{Times New Roman}
+\newfontfamily{\cyrillicfonttt}[Ligatures=TeX]{Courier New}
+
+%% Зачем: Чтобы можно было использовать русские буквы в формулах, но в случае использования предупреждать об этом.
+%\usepackage[warn]{mathtext}
 
 % Зачем: Учет особенностей различных языков.
 \usepackage{babel}
@@ -333,51 +347,6 @@
 % Примечание: final нужен для переопределения режима draft, в котором листинги не выводятся в документ.
 \usepackage[final]{listings}
 
-
-% Зачем: настройка оформления листинга для языка F#
-\definecolor{bluekeywords}{rgb}{0.13,0.13,1}
-\definecolor{greencomments}{rgb}{0,0.5,0}
-\definecolor{turqusnumbers}{rgb}{0.17,0.57,0.69}
-\definecolor{redstrings}{rgb}{0.5,0,0}
-
-\renewcommand{\lstlistingname}{Листинг}
-
-\lstdefinelanguage{FSharp}
-    {morekeywords={abstract,and,as,assert,base,begin,class,default,delegate,do,done,downcast,downto,elif,else,end,exception,extern,false,finally,for,fun,function,global,if,in,inherit,inline,interface,internal,lazy,let,let!,match,member,module,mutable,namespace,new,not,null,of,open,or,override,private,public,rec,return,return!,select,static,struct,then,to,true,try,type,upcast,use,use!,val,void,when,while,with,yield,yield!,asr,land,lor,lsl,lsr,lxor,mod,sig,atomic,break,checked,component,const,constraint,constructor,continue,eager,event,external,fixed,functor,include,method,mixin,object,parallel,process,protected,pure,sealed,tailcall,trait,virtual,volatile},
-    keywordstyle=\bfseries\color{bluekeywords},
-    sensitive=false,
-    morecomment=[l][\color{greencomments}]{///},
-    morecomment=[l][\color{greencomments}]{//},
-    morecomment=[s][\color{greencomments}]{{(*}{*)}},
-    morestring=[b]",
-    stringstyle=\color{redstrings},
-    }
-
-\lstdefinestyle{fsharpstyle}{
-   xleftmargin=0ex,
-   language=FSharp,
-   basicstyle=\footnotesize\ttfamily,
-   breaklines=true,
-   columns=fullflexible
-}
-
-\lstdefinestyle{csharpinlinestyle} {
-  language=[Sharp]C,
-  morekeywords={yield,var,get,set,from,select,partial,where,async,await},
-  breaklines=true,
-  columns=fullflexible,
-  basicstyle=\footnotesize\ttfamily
-}
-
-\lstdefinestyle{csharpstyle}{
-  language=[Sharp]C,
-  frame=lr,
-  rulecolor=\color{blue!80!black}}
-
-
-% Зачем: Нумерация листингов в пределах секции
-\AtBeginDocument{\numberwithin{lstlisting}{section}}
-
 \usepackage[normalem]{ulem}
 
 \usepackage[final,hidelinks,unicode]{hyperref}
@@ -477,19 +446,6 @@
    breaklines=true,
    tabsize=4
 }
-
-% Установка язков
-\setdefaultlanguage{russian}
-\setmainlanguage{russian}
-\setotherlanguage{english}
-
-% Лигатуры нужны для правильного отображения тире, кавычек и прочего
-\setmainfont[Ligatures=TeX]{Times New Roman}
-\setmonofont[Ligatures=TeX]{Courier New}
-
-% Необходимо для киррилических шрифтов
-\newfontfamily{\cyrillicfont}[Ligatures=TeX]{Times New Roman}
-\newfontfamily{\cyrillicfonttt}[Ligatures=TeX]{Courier New}
 
 % Удаляет точки после нумерации section и прочих
 \AtBeginDocument{%

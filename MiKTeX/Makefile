@@ -7,15 +7,19 @@ else
 endif
 #XELATEX = xelatex
 XELATEX = lualatex --shell-escape
+#XELATEX = lualatex
 #XELATEX = pdflatex
 DIPLOMA_REPORT_PDF = diploma_report
 PRACTICE_REPORT_PDF = practice_report
 ECONOMICS_REPORT_PDF = economics_report
 FEEDBACK_REPORT_PDF = feedback_report
+SPEECH_REPORT_PDF = speech_report
 REVIEW_REPORT_PDF = review_report
 COURSE_REPORT_PDF = course_report
 TITLE_PDF = diploma_title_only
 TASK_PDF = diploma_task_only
+PRESENTATION_PDF = presentation
+SHORT_SPEECH_PDF = short_speech
 BIBTEX = bibtex
 RM = rm -f
 GREP = grep
@@ -23,7 +27,9 @@ GREP = grep
 
 #all: $(DIPLOMA_REPORT_PDF).pdf $(PRACTICE_REPORT_PDF).pdf $(TITLE_PDF).pdf $(TASK_PDF).pdf
 #all: $(DIPLOMA_REPORT_PDF).pdf
-all: $(REVIEW_REPORT_PDF).pdf
+#all: $(SPEECH_REPORT_PDF).pdf
+#all: $(PRESENTATION_PDF).pdf
+all: $(SHORT_SPEECH_PDF).pdf
 
 
 publish_to_dropbox: all
@@ -50,6 +56,15 @@ $(DIPLOMA_REPORT_PDF).pdf: *.tex
 
 $(FEEDBACK_REPORT_PDF).pdf: *.tex
 	$(XELATEX) $(FEEDBACK_REPORT_PDF)
+
+$(PRESENTATION_PDF).pdf: *.tex
+	$(XELATEX) $(PRESENTATION_PDF)
+
+$(SPEECH_REPORT_PDF).pdf: *.tex
+	$(XELATEX) $(SPEECH_REPORT_PDF)
+
+$(SHORT_SPEECH_PDF).pdf: *.tex
+	$(XELATEX) $(SHORT_SPEECH_PDF)
 
 $(REVIEW_REPORT_PDF).pdf: *.tex
 	$(XELATEX) $(REVIEW_REPORT_PDF)
