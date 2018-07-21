@@ -1,0 +1,1001 @@
+\section{РАЗРАБОТКА ПРОГРАММНЫХ МОДУЛЕЙ}
+\label{sec:modules}
+
+При разработке данного программного обеспечения было необходимо реализовать возможность настройки и тестирования
+набора устройств. С учетом дальнейшей возможности расширения списка устройств, с которыми должно работать разработанное
+ПО, была выбрана модульная архитектура приложения. Разработанные модули были спроектированы максимально независимыми.
+Также интерфейс модулей, отвечающих за тестирование устройств максимально унифицирован. Функции настройки устройств были
+вынесены в отдельные программы для лучшего абстрагирования модулей системы. Все вышеописанные решения
+позволили спроектировать легко расширяемую систему.
+
+Ниже будет приведено описание нескольких наиболее важных алгоритмов системы.
+
+\subsection{Управляющий модуль}
+Данный модуль управляет процессом тестирования всех подключенных устройств, поэтому рассмотрение работы данного модуля
+представляет особый интерес.
+Работа модуля начинается с составления дерева подключенных устройств. Для этого используется функция
+\texttt{loadDevices}, которая вызывается в процессе работы конструктора \texttt{OfflineFuncControl}.
+Данная функция сначала производит формирование групп подключенных устройств.
+%\medskip
+\begin{minted}{c++}
+m_pTreeDevice->clear();
+
+QList<quint8> groups = getListGroupsDevices();
+QHash<quint8, QTreeWidgetItem*> groupWidgetHash;
+
+for (quint8 i = 0; i < groups.size(); i++) {
+
+	QTreeWidgetItem* pItemGroup = new QTreeWidgetItem(m_pTreeDevice);
+	quint8 groupId = groups[i];
+	groupWidgetHash.insert(groupId, pItemGroup);
+	QString groupName = getNameGroupDevice( groups[i] );
+
+	QFont f = pItemGroup->font(0);
+	f.setBold(true);
+
+	pItemGroup->setFont(0, f);
+	pItemGroup->setText(0, groupName);
+	pItemGroup->setSizeHint(0, QSize(0, 32));
+
+	m_pTreeDevice->insertTopLevelItem(0, pItemGroup);
+	pItemGroup->setExpanded(true);
+	Qt::ItemFlags flags = pItemGroup->flags();
+	flags |= Qt::ItemIsUserCheckable;
+
+	pItemGroup->setFlags(flags);
+	pItemGroup->setCheckState(0, Qt::Checked);
+	pItemGroup->setData(0, Qt::UserRole, Qt::Checked);
+	pItemGroup->setData(1, Qt::UserRole, 0);
+	pItemGroup->setHidden(true);
+}
+\end{minted}
+\medskip
+
+В начале данного алгоритма происходит получение списка групп\break устройств. После полученные группы добавляются к вершине
+дерева\break устройств, происходит настройка соответствующим группам элементам интерфейса.
+
+После добавление групп в дерево устройств проводится добавление подключенных устройств в группы.
+Согласно алгоритмам, схожим с приведенным в листинге, производится поиск сетевых и
+периферийных устройств.
+
+Процесс прохождения тестирования устройств проходит следующим образом. После нажатия кнопки <<Старт>> срабатывает
+происходит вызов метода \texttt{onStart}, который отвечает за процесс тестирования.
+\medskip
+\begin{minted}{c++}
+if (m_bStartTest)
+	return;
+
+m_bStartTest = true;
+m_pBtStart->setEnabled(false);
+m_pBtPrint->setEnabled(false);
+m_pBtSettings->setEnabled(false);
+m_pBtJournal->setEnabled(false);
+QTreeWidgetItemIterator it(m_pTreeDevice);
+
+JournalEntry journalEntry;
+QString sRez;
+\end{minted}
+\medskip
+
+Данный фрагмент кода служит для деактивации некоторых элементов интерфейса на время тестирования и получения указателя
+на дерево\break устройств. Объект \texttt{JournalEntry} будет использован для хранения данных о результатах тестирования и
+записи их в журнал.
+\medskip
+\begin{minted}{c++}
+while (*it) {
+	sRez = "";
+	QTreeWidgetItem * item = *it;
+	if ((item->checkState(0) != Qt::Checked) || item->childCount() || item->isHidden())
+	{
+		++it;
+		continue;
+	}
+
+	item->setForeground(1, QBrush(Qt::black));
+	item->setText(1, ID_FUNC_FONE_2 + "...");
+
+	quint32 idItem = item->data(1, Qt::UserRole).toUInt();
+
+	m_pTreeDevice->clearSelections();
+	m_pTreeDevice->selectItemById(idItem, true);
+
+	QTest::qWait(500);
+
+	QString sNameDevise = item->text(0);
+	QString sNameDeviseParent = item->text(0);
+
+	quint8 deviceId = item->data(1, Qt::UserRole).toUInt();
+
+	quint8 rez = 0;
+\end{minted}
+\medskip
+
+Процесс обхода дерева устройств происходит внутри цикла. Устройства, проверка которых не требуется, группы устройств,
+спрятанные устройства  не участвуют в процессе тестирования. Далее происходит изменение элементов графического
+интерфейса, соответствующих устройству, которое проходит тестирование в данный момент, для информирования пользователя о
+статусе процесса тестирования. Для предотвращения частого изменения элементов графического интерфейса добавлена
+небольшая задержка. Также происходит получение информации о выбранном устройстве и соответствующей ему группе.
+\medskip
+\begin{minted}{c++}
+switch (deviceId)
+{
+	case 1:
+	case 2:
+	case 3:
+	case 4:
+	case 5:
+	case 20:
+	case 21:
+	case 22:
+	case 23:
+		{
+			///АРМы
+			QTestARM test(this);
+			rez = test.test(deviceId, sRez);
+			break;
+		}
+
+	case 6:
+	case 7:
+	case 8:
+	case 9:
+	case 109:
+	case 10:
+	case 16:
+		{
+			//Р-180, Р-181
+			VTest_R181 test(this);
+			rez = test.test(deviceId, sRez);
+			break;
+		}
+\end{minted}
+\medskip
+
+Для каждого устройства используется соответствующий объект для\break проведения тестирования. Метод \texttt{test} отвечает
+непосредственно за тестирование выбранного устройства. Результат тестирования сохраняется в переменную \texttt{rez}.
+Данное значение будет использоваться в дальнейшем при формировании результатов тестирования. Наличие множества меток
+перед блоков, выполняющим тестирование АРМ, и блоком, выполняющим тестирование радиостанции, необходимо для поддержки
+тестирования различных АРМ и различных типов радиостанций.
+\medskip
+\begin{minted}{c++}
+	case 11:
+		{
+			//Метеостанция
+			VTest_MeteoWXT520 test(this);
+			rez = test.test(sRez);
+			break;
+
+		}
+	case 12:
+		{
+			//БИНС-3
+			VTest_BINS3 test(this);
+			rez = test.test(sRez);
+			break;
+
+		}
+	case 13:
+		{
+			//1Д22
+			VTest_1D22 test(this);
+			rez = test.test(sRez);
+			break;
+
+		}
+	case 14:
+		{
+			//Капонир
+			VTest_Kaponir test(this);
+			rez = test.test(sRez);
+			break;
+
+		}
+	case 17:
+		{
+			//GPS
+			VTest_GPS test(this);
+			rez = test.test(sRez);
+			break;
+		}
+	case 18:
+		{
+			//Принтер
+			QTestPrinter test(this);
+			rez = test.test(sRez);
+			break;
+		}
+	default:
+			break;
+}
+\end{minted}
+\medskip
+
+В блоке \texttt{switch} происходит переход к метке, соответствующей идентификатору устройства. При наличии в тестируемой
+системе устройств, поддержка которых не реализована в программе функционального контроля, осуществляется переход к метке
+\texttt{default}.
+
+\medskip
+\begin{minted}{c++}
+DeviceInfo deviceInfo;
+deviceInfo.deviceName = sNameDevice;
+
+QString sRezSaved = sRez;
+sRezSaved.replace("\r\n", CR);
+sRezSaved.replace("\"", "\\\"");
+deviceInfo.additionalInfo = sRezSaved;
+\end{minted}
+\medskip
+
+Данный фрагмент кода осуществляет создание и формирование структуры \texttt{deviceInfo}. В структуру записываются
+данные, полученные в ходе тестирования устройства. Производится форматирование полученных данных.
+
+\medskip
+\begin{minted}{c++}
+if (rez == 0)
+{
+	item->setForeground(1, QBrush(QColor(0, 150, 0)));
+	item->setText(1, ID_FUNC_AKPP_7);
+	deviceInfo.resultMessage = ID_FUNC_AKPP_7;
+	deviceInfo.hasError = false;
+}
+else if (rez == 1 || rez > 3)
+{
+	item->setForeground(1, QBrush(QColor(150, 0, 0)));
+	item->setText(1, ID_FUNC_AKPP_8);
+	deviceInfo.resultMessage = ID_FUNC_AKPP_8;
+	deviceInfo.hasError = true;
+}
+else if (rez == 2)
+{
+	item->setForeground(1, QBrush(QColor(150, 0, 0)));
+	item->setText(1, ID_FUNC_AKPP_9);
+	deviceInfo.resultMessage = ID_FUNC_AKPP_9;
+	deviceInfo.hasError = true;
+}
+else if (rez == 3)
+{
+	item->setForeground(1, QBrush(QColor(150, 0, 0)));
+	item->setText(1, ID_FUNC_AKPP_10);
+	deviceInfo.resultMessage = ID_FUNC_AKPP_10;
+	deviceInfo.hasError = true;
+}
+\end{minted}
+\medskip
+
+На основе полученного результата тестирования устройства, происходит вывод соответствующего информационного сообщения.
+В поле <<Результаты проверки>> могут выводится следующие сообщения:
+\begin{itemize}
+	\item <<Исправно>>;
+	\item <<Неисправно>>;
+	\item <<Порт занят>>;
+	\item <<Устройство не подключено>>.
+\end{itemize}
+
+Сообщение об исправности работы устройства выводится зеленым цветом, остальные сообщения выводятся красным. Данный
+подход упрощает идентификацию тестов, завершившихся неудачей.
+\medskip
+\begin{minted}{c++}
+	saveRezTest(sNameDevise, deviceInfo.resultMessage, rez);
+	journalEntry.addDevice(deviceInfo);
+	++it;
+}
+\end{minted}
+\medskip
+
+Полученная об устройстве информация сохраняется в отдельный файл. Также происходит добавление данных в массив
+\texttt{journalEntry} для создания записи в журнале. Далее происходит переход на следующую итерацию цикла.
+\medskip
+\begin{minted}{c++}
+Journal::store(journalEntry);
+m_pTreeDevice->clearSelections();
+m_pBtStart->setEnabled(true);
+m_pBtPrint->setEnabled(true);
+m_pBtSettings->setEnabled(true);
+m_pBtJournal->setEnabled(true);
+m_bStartTest = false;
+\end{minted}
+\medskip
+
+После завершения процесса тестирования устройств происходит сохранение результатов в журнал и активация доступности
+кнопок интерфейса. Флаг \texttt{m\_bStartTest}, который используется для обозначения нахождения системы в состоянии
+проведения тестирования, сбрасывается.
+
+\subsection{Модуль тестирования БИНС}
+Данный модуль осуществляет тестирование БИНС. Проводится проверка подключения БИНС, происходит считывание и анализ
+сообщений статуса и навигационных сообщений БИНС. Рассмотрим данный алгоритм подробнее.
+
+При создании объекта вызывается конструктор, который проводит инициализацию флагов получения сообщений и привязывает
+метод для обработки данных сокета к сигналу наличия данных в сокете.
+\medskip
+\begin{minted}{c++}
+m_bReceiveMess01 = false;
+m_bReceiveMess81 = false;
+connect(&m_sockReceive, SIGNAL(readyRead()), SLOT(onReadFromSocket()));
+\end{minted}
+\medskip
+
+Метод \texttt{test} отвечает за управление процессом тестирования БИНС. Метод начинает работу с проверки настроек и
+параметров подключенного устройства. В ходе проверки вся полученная информация заносится в журнал.
+\medskip
+\begin{minted}{c++}
+sRez.clear();
+
+sRez = "<b>" + getNameDevice(ID_DEVICE_BINS3) + "</b>";
+sRez += CR;
+
+_SETT_ARM sett;
+if (!getSettARM(sett))
+{
+	sRez += CR;
+	sRez += tr("Не заданы настройки подключения INS!");
+	return 10;
+}
+\end{minted}
+\medskip
+
+Остальные настройки и параметры, такие как параметры подключения устройства, IP адрес, проверяются аналогичным образом.
+
+При удачном подключении БИНС после проверки состояния устройства программа начинает считывать и анализировать полученные
+данные, для ожидания окончания сбора необходимых пакетов используется\break \texttt{QEventLoop}.
+\medskip
+\begin{minted}{c++}
+QEventLoop ev;
+
+QTimer::singleShot(5000, &ev, SLOT(quit()));
+connect(this, SIGNAL(signGetAllMessFromBINS()), &ev, SLOT(quit()));
+ev.exec();
+\end{minted}
+\medskip
+
+Далее полученные дейтаграммы анализируются в методах\break \texttt{decodeMes01} и \texttt{decodeMes81}.
+
+Метод \texttt{onReadFromBINS} проводит разбиение полученных\break дейтаграмм на сообщения и анализ данных сообщений.
+\medskip
+\begin{minted}{c++}
+static QByteArray baRemain;
+QByteArray baData = baRemain + datagram;
+QList<QByteArray> listMess = Protocol_BINS3::unpackMess(baData, baRemain);
+
+for (quint32 i = 0; i < listMess.size(); i++)
+{
+	QByteArray baKdg = listMess.at(i);
+	Protocol_BINS3::_KDG kdg = Protocol_BINS3::unpackKDG(baKdg);
+
+	if (kdg.typeKDG == Protocol_BINS3::MESS_01)
+	{
+		m_mes01 = kdg.kdg01;
+		m_bReceiveMess01 = true;
+	}
+	else if (kdg.typeKDG == Protocol_BINS3::MESS_81)
+	{
+		m_mes81 = kdg.kdg81;
+		m_bReceiveMess81 = true;
+	}
+
+	if (m_bReceiveMess01 && m_bReceiveMess81)
+	{
+		emit signGetAllMessFromBINS();
+		break;
+	}
+}
+\end{minted}
+\medskip
+
+Данный метод производит разбиение полученной дейтаграммы\break \texttt{datagram} на сообщения и формирует список сообщений.
+Далее происходит анализ полученных сообщений. Полученное сообщение инкапсулируется в структуру \texttt{kdg} для удобства
+доступа к полям сообщения.
+
+Происходит анализ типа полученных сообщений. При получении сообщения с навигационными данными или сообщения с
+информацией о статусе устройства происходит установка соответствующего флага и инкапсуляция заголовка сообщения в
+соответствующую структуру, используемую при дальнейшем анализе. При получении сообщений двух типов происходит генерация
+сигнала \texttt{signGetAllMessFromBINS}. Данный сигнал прерывает \texttt{QEventLoop}.
+
+Метод \texttt{onReadFromSocket} используется для чтения данных из сокета. Метод вызывается при генерации сокетом сигнала
+\texttt{readyRead}.
+\medskip
+\begin{minted}{c++}
+void VTest_BINS3::onReadFromSocket()
+{
+	while (m_sockReceive.hasPendingDatagrams())
+	 {
+		 QByteArray datagram;
+		 datagram.resize(
+			 m_sockReceive.pendingDatagramSize());
+
+		 QHostAddress sender;
+		 quint16 senderPort;
+
+		 m_sockReceive.readDatagram(datagram.data(), datagram.size(),
+					 &sender, &senderPort);
+
+		 if (m_bReceiveMess01 && m_bReceiveMess81)
+			 continue;
+
+		 onReadFromBINS(datagram);
+	}
+}
+\end{minted}
+\medskip
+
+Метод читает дейтаграммы из сокета. Если еще не были получены оба типа сообщений, происходит вызов метода
+\texttt{onReadFromBINS} для анализа типа полученных дейтаграмм.
+
+Методы \texttt{decodeMes81} и \texttt{decodeMes01} служат для анализа сообщений статуса и сообщений с навигационными
+данными соответственно.
+\medskip
+\begin{minted}{c++}
+void VTest_BINS3::decodeMes81(bool & bIspr, QString & sRez)
+{
+	bIspr = true;
+	sRez += CR;
+	sRez += CR;
+	sRez += tr("<b>Статус INS:</b>");
+	sRez += CR;
+
+	sRez += tr("Признак калибровки ДПЦ-2: ");
+	if(m_mes81.calibrate_DPC2 == 0)
+		sRez += tr("Не выполнена");
+	else
+		sRez += tr("Выполнена");
+	sRez += CR;
+
+	sRez += tr("Признак исправности ДПЦ-2: ");
+	if(m_mes81.order_DPC2 == 0)
+	{
+		sRez += tr("Не исправен");
+		bIspr = false;
+	}
+	else
+		sRez += tr("Исправен");
+	sRez += CR;
+\end{minted}
+\medskip
+
+Метод \texttt{decodeMes81} производит анализ полей сообщения статуса. Вся полученная информация сохраняется для
+последующей записи в журнал.
+
+Получение информации о состоянии устройства и текущих навигационных данных производится с помощью анализа соответствующих
+полей сообщений.
+
+Работа метода \texttt{decodeMes01}, анализирующего сообщения с навигационными данными, аналогична методу
+\texttt{decodeMes81}, за исключением\break необходимости преобразования координат в удобную для чтения форму.
+
+\subsection{Модуль тестирования принтера}
+Данный модуль используется для проверки корректности настроек\break подключения принтера и проверки качества печати путем
+печати тестовой страницы.
+
+Метод \texttt{test} производит проверку параметров подключения устройства, после чего осуществляется настройка
+диалогового окна для печати тестовой страницы.
+\medskip
+\begin{minted}{c++}
+QPrinter printer(QPrinter::HighResolution);
+printer.setOrientation(QPrinter::Portrait);
+printer.setDocName (ID_FUNC9);
+QWidget * widg = qobject_cast<QWidget *>(parent());
+
+QPrintPreviewDialog dlgPreview(&printer, widg);
+connect(&dlgPreview, SIGNAL(paintRequested(QPrinter * )), this, SLOT(print(QPrinter *)));
+dlgPreview.resize(800, 800);
+dlgPreview.show();
+dlgPreview.exec();
+
+if (QMessageBox::question(0, ID_FUNC9, ID_FUNC24, QMessageBox::Yes, QMessageBox::No) == QMessageBox::Yes)
+{
+	sRez += CR;
+	sRez += tr("Тестовая страница напечатана корректно!");
+	return 0;
+}
+
+sRez += CR;
+sRez += tr("Тестовая страница напечатана некорректно!");
+
+return 1;
+\end{minted}
+\medskip
+
+Печать страницы осуществляется с помощью средств библиотеки Qt. Объект \texttt{QPrinter} представляет собой виртуальное
+устройство печати. Метод \texttt{test} осуществляет настройку параметров печати страницы, после чего происходит
+настройка диалогового окна печати. Для генерации тестовой страницы используется метод \texttt{print}, который вызывается
+при создании перевью документа, подготовленного для печати. Проверка корректности печати осуществляется оператором.
+Результаты проверки вносятся в журнал с помощью соответствующих кнопок \texttt{QMessageBox}. Далее рассмотрим метод,
+отвечающий за создание тестовой страницы.
+\medskip
+\begin{minted}{c++}
+void QTestPrinter::print(QPrinter * printer)
+{
+  printer->setFullPage(false);
+  QPainter paint(printer);
+  QFont font = paint.font();
+  font.setPointSize(16);
+  paint.setFont(font);
+
+  qreal left, top, right, bottom;
+
+  printer->getPageMargins (&left, &top, &right, &bottom, QPrinter::DevicePixel);
+  QRectF rectPaint = printer->paperRect(QPrinter::DevicePixel);
+
+  QRect rectTitle = QRect(QPoint(rectPaint.left() + left + 10, rectPaint.top() + top + 10), QPoint(rectPaint.right() - right - left - 10, rectPaint.top() + top + rectPaint.height()/15));
+  paint.drawRect(rectTitle);
+
+  _SETT_ARM sett;
+  getSettARM(sett);
+
+  QString sIzdelie = QString("%1, %2").arg( getNameObject1B12(sett.typeObject)).arg( getNameDevice(sett.idARM));
+  paint.drawText(rectTitle, Qt::AlignCenter, QDateTime::currentDateTime().toString("yyyy-MM-dd hh:mm:ss") + " " + sIzdelie);
+
+  int i;
+  int pointSize = 34;
+  int y = rectPaint.height()/15 + top + 20;
+  for (i = 0; i < 10; i++)
+  {
+	  QRect rectText(QPoint(rectPaint.width()/25,y), QPoint(rectPaint.right() - right, y + rectPaint.height()/15));
+	  font.setPointSize(pointSize);
+	  paint.setFont(font);
+	  paint.drawText(rectText, Qt::AlignVCenter | Qt::AlignLeft, ID_FUNC9);
+
+	  y += rectPaint.height()/15;
+	  pointSize -= 2;
+	  printer->setFullPage(false);
+  }
+
+  printer->setFullPage(true);
+}
+
+\end{minted}
+\medskip
+
+Метод получает указатель на устройство печати типа \texttt{QPrinter}. Данный указатель используется для настройки
+параметров печати. Метод производит настройку параметров страницы, настройку используемого шрифта, после чего формирует
+место под заголовок страницы. Далее производится заполнение документа тестовыми строками.
+
+\texttt{Модуль тестирования АРМ}
+Данный модуль осуществляет проверку состояния подключения к сети всех АРМ, находящихся в машине.
+\medskip
+\begin{minted}{c++}
+quint8 QTestARM::test(quint8 idDevice, QString & sRez) {
+	_SETT_ARM sett;
+	if (!getSettARM(sett))
+		return 10;
+
+	_IP_DEVICE device = sett.shemeLAN.value(idDevice);
+
+	if (!device.idDevice)
+		return 10;
+
+	sRez += getNameDevice(device.idDevice);
+
+	if (!device.hashIP.size())
+	{
+		sRez += CR;
+		sRez += tr("Для устройства не заданы интерфейсы подключения к локальной сети!");
+		return 10;
+	}
+
+	QHashIterator<QString, QString> it(device.hashIP);
+
+	quint8 rez = 0;
+	while (it.hasNext())
+	{
+		it.next();
+		QString sLan = it.key();
+		QString sIP = it.value();
+
+		sRez += CR;
+		sRez += QString("%1 (%2): ").arg(sLan).arg(sIP);
+		sRez += CR;
+
+		quint8 rez1 = ping(sIP, sRez);
+
+		if (rez1)
+			rez = rez1;
+	}
+
+	return rez;
+}
+\end{minted}
+\medskip
+
+Метод осуществляет получение настроек АРМ и чтение схемы сети. На основе полученных данных происходит проверка
+корректности настроек АРМ. Если сетевые интерфейсы настроены корректно, происходит проверка состояния соседних АРМ путем
+посылки ping сообщений.
+
+\subsection{Модуль журналирования}
+Данный модуль отвечает за сохранения результатов тестирования в формате JSON. Формат JSON был выбран для хранения файлов
+журнала из-за того, что результирующий файл легко читается человеком. Также данный формат помогает легко выполнять
+сериализацию сложных структур данных. Рассмотрим работу функции, выполняющей сохранение данных в журнал.
+\medskip
+\begin{minted}{c++}
+void Journal::store(JournalEntry journalEntry)
+{
+	QString sDir = QApplication::applicationDirPath();
+	QString filename = sDir + "/Journal/data/" + journalEntry.getDate().toString("yyyy-MM") + ".json";
+	QFile file(filename);
+	if (!file.exists()) {
+		file.open(QIODevice::ReadWrite);
+		QTextStream stream(&file);
+		stream.setCodec("UTF-8");
+		stream << "[\n" << asJSON(journalEntry) << "\n]";
+		stream.flush();
+		file.close();
+	} else {
+		file.open(QIODevice::ReadOnly);
+		QTextStream inStream(&file);
+		inStream.setCodec("UTF-8");
+		QString jsonArray = inStream.readAll();
+		file.close();
+
+		QString jsonJournalEntry = asJSON(journalEntry);
+		appendEntryToArray(jsonArray, jsonJournalEntry);
+		file.open(QIODevice::WriteOnly);
+		QTextStream outStream(&file);
+
+		outStream.setCodec("UTF-8");
+		outStream << jsonArray;
+		outStream.flush();
+		file.close();
+	}
+}
+\end{minted}
+\medskip
+
+Данный метод отвечает за запись сформированной \texttt{JournalEntry} в JSON файл. Каждый файл содержит данные о всех
+тестах, проведенных за соответствующий месяц. В случае наличия файла с результатами предыдущих тестов за текущий месяц
+результаты текущего теста добавляются к массиву со всеми записями за месяц. В случае отсутствия файла с предыдущими
+записями происходит создание нового файла и добавление в него данных.
+
+\subsection{Программа просмотра содержимого журнала}
+Данная программа служит для просмотра журнала. Для фильтрации выводимой на экран информации существуют фильтры по дате,
+степени детализации информации, типу устройств. Информация выводится на экран в виде таблицы, возможность вывода на
+печать также присутствует.
+
+Рассмотрим подробнее работу данной программы.
+
+Метод \texttt{readJSON} осуществляет чтение данных из журнала тестирования. Прототип метода представлен ниже.
+\medskip
+\begin{minted}{c++}
+void Journal::readJSON()
+\end{minted}
+\medskip
+
+Рассмотрим работу данного метода.
+\medskip
+\begin{minted}{c++}
+QDir dir(qApp->applicationDirPath());
+dir.cd("Journal");
+dir.cd("data");
+
+dir.setFilter(QDir::Files | QDir::NoSymLinks);
+QStringList filters;
+filters << "*.json";
+
+dir.setNameFilters(filters);
+dir.setSorting(QDir::Time);
+QFileInfoList fileList = dir.entryInfoList();
+\end{minted}
+\medskip
+
+Метод получает путь к рабочему каталогу приложения, после этого осуществляется переход в директорию
+\texttt{Journal/data}, в которой находятся файлы журнала в формате JSON. После этого к директории применяется фильтр,
+который служит для отсеивания файлов, не относящихся к журналу (не имеющих расширения \texttt{.json}). После этого
+происходит сортировка файлов по времени создания и получение списка файлов.
+
+\medskip
+\begin{minted}{c++}
+for(int i = 0; i < fileList.size(); i++)
+{
+	QFile JSONfile;
+	QFileInfo fileInfo = fileList.at(i);
+	JSONfile.setFileName(fileInfo.absoluteFilePath());
+	JSONfile.open(QIODevice::ReadOnly | QIODevice::Text);
+	JSON newDate;
+	JSONdevice newDevice;
+
+	QString line;
+	bool nextDate = false;
+	QTextStream jsonIn(&JSONfile);
+	jsonIn.setCodec(QTextCodec::codecForName("UTF8"));
+\end{minted}
+\medskip
+
+Происходит проход по списку файлов журнала. Выполняется открытие файла в кодировке UTF-8. Для хранения данных, которые
+будут получены в ходе парсинга, используются структуры \texttt{JSON} и \texttt{JSONdevice}.
+\medskip
+\begin{minted}{c++}
+		while (!jsonIn.atEnd())
+		{
+			line = jsonIn.readLine();
+			if(line.contains("date"))
+			{
+				if(nextDate)
+				{
+					devices << newDate;
+					newDate.device.clear();
+				}
+				newDate.timeTest = QDateTime::fromString(line.mid(9,19), "yyyy-MM-dd HH:mm:ss");
+				nextDate = true;
+			}
+			else if(line.contains("name"))
+			{
+				int n = line.indexOf("result");
+				newDevice.deviceName = line.mid(10, n - 14);
+				if(line.contains("false"))
+				{
+					newDevice.result = true;
+
+				}
+				else
+				{
+					newDevice.result = false;
+
+				}
+				int k = line.indexOf("info");
+				n = line.indexOf("hasError");
+
+				newDevice.info = line.mid(k+7, n-k-11);
+				newDevice.info.replace("),", ")");
+				newDevice.info.replace("\\n","<br />");
+				newDevice.infoDialog = newDevice.info;
+				newDevice.info.replace("<br />", " ");
+				newDevice.info.remove("<b>");
+				newDevice.info.remove("</b>");
+
+				newDate.device << newDevice;
+			}
+		}
+		devices << newDate;
+		int n = devices.size();
+		JSONfile.close();
+	}
+	addFilterDevices();
+}
+\end{minted}
+\medskip
+
+Чтение файла происходит построчно.
+Если строка содержит информацию о времени тестирования, происходит добавление предыдущей
+записи о времени к списку устройств и формирование новой записи о времени тестирования. Такое поведение вызвано тем, что
+временная информация предшествует списку устройств. Если получена информация о результатах тестирования устройств, то
+происходит запись полученных данных в структуру \texttt{newDevice}. В структуру сохраняется имя устройства, основная и
+дополнительная информация о результатах тестирования. Информация о наличии ошибок в ходе тестирования также добавляется
+в структуру. Сформированная структура добавляется в список устройств \texttt{device} структуры \texttt{newDate}.
+
+После чтения файла происходит добавление полученных данных к списку записей \texttt{devices}.
+
+После чтения всех элементов журнала происходит фильтрация полученных данных с помощью вызова метода
+\texttt{addFilterDevices}.
+
+Метод \texttt{addFilterDevices} осуществляет формирование фильтра\break устройств. Данный список формируется из перечня типов
+протестированных устройств.
+
+Данный метод
+имеет следующий прототип.
+\medskip
+\begin{minted}{c++}
+void Journal::addFilterDevices()
+\end{minted}
+\medskip
+
+Рассмотрим работу данного метода.
+\medskip
+\begin{minted}{c++}
+void Journal::addFilterDevices()
+{
+	for(int i = 0; i<devices.size(); i++)
+		for(int j=0; j<devices[i].device.size(); j++)
+		{
+			if(!containsLFD(
+				devices[i].device[j].deviceName))
+			{
+				ListFilterDevices newDevice;
+				newDevice.deviceName = devices[i].device[j].deviceName;
+				newDevice.select = false;
+
+				QCheckBox *newCaseCheckBox;
+				newCaseCheckBox = new QCheckBox(
+					devices[i].device[j].deviceName);
+				newCaseCheckBox->setEnabled(false);
+				ui.verticalLayout_3->
+					addWidget(newCaseCheckBox);
+
+				newDevice.caseCheckBox = newCaseCheckBox;
+				LFD.push_back(newDevice);
+			}
+		}
+}
+\end{minted}
+\medskip
+
+Метод осуществляет проход по списку устройств. На каждой итерации цикла происходит проверка наличия текущего устройства в
+списке фильтров. В случае наличия данного устройства в списке фильтров, добавление устройства в список устройств
+фильтра не производится. При отсутствии устройства в списке происходит добавление данного устройства в фильтр с
+созданием соответствующего чекбокса.
+
+Метод \texttt{result} производит фильтрацию полученных данных. На основе отфильтрованных данных строится таблица,
+содержащая записи из журнала, соответствующие заданным критериям.
+
+Метод имеет следующий прототип:
+\medskip
+\begin{minted}{c++}
+void Journal::result()
+\end{minted}
+\medskip
+
+Ниже будет рассмотрена работа данного метода.
+\medskip
+\begin{minted}{c++}
+ui.tableWidget_JSON->setRowCount(0);
+ui.tableWidget_JSON->setColumnCount(0);
+quint8 success = 0;
+QList<QString> checkDevices;
+
+if(!ui.checkBoxAllDevices->checkState())
+{
+	for(int i = 0; i < LFD.size(); i++)
+		if(LFD[i].caseCheckBox->checkState())
+			checkDevices.push_back(LFD[i].deviceName);
+}
+\end{minted}
+\medskip
+
+Метод инициализирует таблицу, в которой будут размещаться данные из журнала. Список \texttt{checkDevices} будет
+использоваться для хранения списка типов устройств, которые требуется отобразить на экране. Условие проверяет состояние
+чекбокса \texttt{checkBoxAllDevices}. В случае, если чекбокс не активен, происходит формирование списка типов устройств
+на основе выставленных чекбоксов, соответствующих типам устройств.
+\medskip
+\begin{minted}{c++}
+for(int i = 0; i < devices.size(); i++)
+{
+	if(devices[i].timeTest >= ui.dateTimeEdit_since->dateTime() && devices[i].timeTest <= ui.dateTimeEdit_to->dateTime())
+	{
+		if(!success)
+			success = 1;
+		for(int j = 0; j < devices[i].device.size(); j++)
+		{
+			if(((ui.checkBox_showServiceable->checkState() && !devices[i].device[j].result) || !ui.checkBox_showServiceable->checkState()) && (!checkDevices.size() || checkDevices.contains(
+			devices[i].device[j].deviceName)) && !(!ui.checkBoxAllDevices->checkState() && !checkDevices.size()))
+			{
+\end{minted}
+\medskip
+
+Далее происходит проход по элементам журнала. Сначала записи фильтруются на основе попадания в заданный временной
+интервал.
+Переменная \texttt{success} хранит код ошибки. Содержимое переменной \texttt{success} используется далее в алгоритме для
+вывода соответствующего сообщения об ошибке.
+После изменения переменной, хранящей код ошибки, происходит проход по записям тестирования, описывающим результаты тестирования каждого устройства.
+Далее происходит фильтрация записей на основе выставленных флагов. Идет проверка согласно фильтру, служащего для показа только
+неисправных устройств. В случае, если фильтр включен, и в работе устройства не было замечено неисправностей, результаты
+тестирования данного устройства не выводятся. Далее проверяется необходимость вывода результатов тестирования устройства
+на основе выставленных чекбоксов, отвечающих за выбор устройств для отображения. Проверка идет на основе состояния
+чекбокса <<Все устройства>> и соответствующего фильтра в \texttt{checkDevices}.
+\medskip
+\begin{minted}{c++}
+if(success != 3)
+{
+	ui.tableWidget_JSON->insertColumn(0);
+	ui.tableWidget_JSON->setHorizontalHeaderItem(0, new QTableWidgetItem(tr("Время провидения тестирования")));
+	ui.tableWidget_JSON->insertColumn(1);
+	ui.tableWidget_JSON->setHorizontalHeaderItem(1, new QTableWidgetItem(tr("Устройство")));
+	ui.tableWidget_JSON->insertColumn(2);
+	ui.tableWidget_JSON->setHorizontalHeaderItem(2, new QTableWidgetItem(tr("Результат тестирования")));
+	if(ui.checkBox_info->checkState())
+	{
+		ui.tableWidget_JSON->insertColumn(3);
+		ui.tableWidget_JSON->setHorizontalHeaderItem(3, new QTableWidgetItem(tr("Дополнительная информация")));
+		ui.tableWidget_JSON->horizontalHeader()->resizeSection(0, 260);
+		ui.tableWidget_JSON->horizontalHeader()->resizeSection(1, 260);
+		ui.tableWidget_JSON->horizontalHeader()->resizeSection(2, 190);
+		ui.tableWidget_JSON->horizontalHeader()->setResizeMode(3, QHeaderView::Stretch);
+	}
+	else
+	{
+		ui.tableWidget_JSON->horizontalHeader()->setResizeMode(0, QHeaderView::Stretch);
+		ui.tableWidget_JSON->horizontalHeader()->setResizeMode(1, QHeaderView::Stretch);
+		ui.tableWidget_JSON->horizontalHeader()->setResizeMode(2, QHeaderView::Stretch);
+	}
+}
+\end{minted}
+\medskip
+
+Производится инициализация таблицы. Создаются необходимые столбцы, происходит установка названий столбцов. В случае
+установки установленного флажка в чекбоксе <<Показывать дополнительную информацию>>, происходит добавление столбца
+<<Дополнительная информация>>. Выполняется настройка ширины столбцов.
+
+В дальнейшем переменной \texttt{success} будет присвоен код 3, чтобы избежать повторного выполнения настройки столбцов.
+\medskip
+\begin{minted}{c++}
+ui.tableWidget_JSON->insertRow(ui.tableWidget_JSON->rowCount());
+devices[i].device[j].idInTable = ui.tableWidget_JSON->rowCount() - 1;
+
+QTableWidgetItem *item = new QTableWidgetItem;
+item->setText(devices[i].timeTest.toString("yyyy-MM-dd HH:mm:ss"));
+item->setFlags(Qt::ItemIsSelectable|Qt::ItemIsEnabled);
+item->setTextAlignment(Qt::AlignCenter);
+ui.tableWidget_JSON->setItem(ui.tableWidget_JSON->rowCount()-1, 0, item);
+
+QTableWidgetItem *item2 = new QTableWidgetItem;
+item2->setText(devices[i].device[j].deviceName);
+item2->setFlags(Qt::ItemIsSelectable|Qt::ItemIsEnabled);
+item2->setTextAlignment(Qt::AlignCenter);
+ui.tableWidget_JSON->setItem(ui.tableWidget_JSON->rowCount()-1, 1, item2);
+\end{minted}
+\medskip
+
+Создается строка, для записи результатов тестирования данного устройства. Происходит запись номера строки в структуру,
+описывающую текущее устройство. Производится запись даты и названия устройства в соответствующие столбцы. Выполняется
+настройка параметров ячеек.
+
+\medskip
+\begin{minted}{c++}
+QTableWidgetItem *item3 = new QTableWidgetItem;
+if(devices[i].device[j].result)
+	item3->setText(tr("Исправно"));
+else
+{
+	item3->setText(tr("Неисправно"));
+	item3->setData(Qt::TextColorRole, Qt::red);
+}
+
+item3->setTextAlignment(Qt::AlignCenter);
+item3->setFlags(Qt::ItemIsSelectable|Qt::ItemIsEnabled);
+ui.tableWidget_JSON->setItem(ui.tableWidget_JSON->rowCount()-1, 2, item3);
+\end{minted}
+\medskip
+
+На основе анализа состояния булевой переменной \texttt{result}, хранящей информацию о наличии ошибок в ходе тестирования
+устройства, происходит запись соответствующего сообщения в ячейку таблицы. Сообщение о неисправности устройства
+выделяется красным цветом для удобства оператора.
+
+\medskip
+\begin{minted}{c++}
+if(ui.checkBox_info->checkState())
+{
+	QTableWidgetItem *item4 = new QTableWidgetItem;
+	item4->setText(devices[i].device[j].info);
+	item4->setFlags(Qt::ItemIsSelectable|Qt::ItemIsEnabled);
+	item4->setTextAlignment(Qt::AlignCenter);
+	ui.tableWidget_JSON->setItem(ui.tableWidget_JSON->rowCount()-1, 3, item4);
+}
+success = 3;
+\end{minted}
+\medskip
+
+В случае наличия флажка в чекбоксе <<Показывать дополнительную информацию>>, производится добавление дополнительной
+информации о результатах тестирования устройства в соответствующий столбец таблицы.
+\medskip
+\begin{minted}{c++}
+		}
+			else
+				devices[i].device[j].idInTable = -1;
+		}
+	}
+}
+\end{minted}
+\medskip
+
+Данный блок \texttt{else} относится к условию, проверяющему необходимость вывода информации, относящейся к
+устройству, на экран. Данные\break устройства, не соответствующих критериям, не выводятся на экран, и полю, в котором хранится
+номер столбца, соответствующего данному устройству, присваивается значение -1.
+
+Данный фрагмент кода закрывает цикл прохода по элементам журнала.
+\medskip
+\begin{minted}{c++}
+	if(success == 0)
+	{
+		QMessageBox::information(0, tr("Нет данных"), tr("Нет тестов за указанный промежуток времени"));
+	}
+	else if(success == 1)
+	{
+		if(!ui.checkBoxAllDevices->checkState() && !checkDevices.size())
+			QMessageBox::information(0, tr("Нет данных"), tr("Не выбрано ни одного устройства"));
+		else
+			QMessageBox::information(0, tr("Нет данных"), tr("Нет неисправных устройств в тестах за указанный промежуток времени"));
+	}
+}
+\end{minted}
+\medskip
+
+В начале метода переменная \texttt{success} была установлена в 0. Данный код ошибки свидетельствует об отсутствии тестов
+за указанный промежуток времени.
+
+Код ошибки 1 может возникнуть в случае, если у не было выбрано ни одного устройства, либо отсутствовали тесты с
+неисправными устройствами при выставленном флажке в чекбоксе <<Показывать только неисправные>>.

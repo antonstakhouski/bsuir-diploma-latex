@@ -1,0 +1,406 @@
+\newcommand{\byr}{руб}
+
+\section{Технико-экономическое обоснование разработки системы функционального контроля технических средств КМУ
+артиллерийского дивизиона}
+
+% Begin Calculations
+\FPeval{\bonusRate}{1.75}
+
+\FPeval{\leadDevHours}{55}
+\FPeval{\devHours}{180}
+\FPeval{\qaHours}{120}
+
+\FPeval{\leadDevPerMonth}{2995.5}
+\FPeval{\devPerMonth}{1180}
+\FPeval{\qaPerMonth}{998.5}
+
+\FPeval{\normativeManHours}{168}
+
+\FPeval{\leadDevPerHourExact}{\leadDevPerMonth / \normativeManHours}
+\FPeval{\devPerHourExact}{\devPerMonth / \normativeManHours}
+\FPeval{\qaPerHourExact}{\qaPerMonth / \normativeManHours}
+
+\FPround{\leadDevPerHour}{\leadDevPerHourExact}{3}
+\FPround{\devPerHour}{\devPerHourExact}{3}
+\FPround{\qaPerHour}{\qaPerHourExact}{3}
+
+\FPeval{\leadDevSalaryExact}{\leadDevHours * \leadDevPerHourExact}
+\FPeval{\devSalaryExact}{\devHours * \devPerHourExact}
+\FPeval{\qaSalaryExact}{\qaHours * \qaPerHourExact}
+
+\FPround{\leadDevSalary}{\leadDevSalaryExact}{1}
+\FPround{\devSalary}{\devSalaryExact}{1}
+\FPround{\qaSalary}{\qaSalaryExact}{1}
+
+\FPeval{\totalSalaryExact}{clip(\leadDevSalaryExact + \devSalaryExact + \qaSalaryExact) * \bonusRate}
+
+\FPround{\totalSalary}{\totalSalaryExact}{1}
+
+\FPeval{\normExtraSalary}{15}
+
+\FPeval{\extraSalaryExact}{\totalSalaryExact * \normExtraSalary / 100}
+\FPround{\extraSalary}{\extraSalaryExact}{1}
+
+\FPeval{\socialFeesCoeff}{34.6}
+\FPeval{\socialFeesExact}{clip(\totalSalaryExact + \extraSalaryExact) * \socialFeesCoeff / 100}
+\FPround{\socialFees}{\socialFeesExact}{1}
+
+\FPeval{\extraFeesCoeff}{125}
+\FPeval{\extraFeesExact}{\totalSalaryExact * \extraFeesCoeff / 100}
+\FPround{\extraFees}{\extraFeesExact}{1}
+
+\FPeval{\totalExpensesExact}{\totalSalary + \extraSalary + \socialFees + \extraFees}
+\FPround{\totalExpenses}{\totalExpensesExact}{1}
+
+\FPeval{\profitTax}{18}
+\FPeval{\ndsNormative}{20}
+
+\FPeval{\productPrice}{21000}
+
+\FPeval{\ndsExact}{clip(\productPrice * \ndsNormative)  / clip(100 + \ndsNormative)}
+\FPround{\nds}{\ndsExact}{1}
+
+\FPeval{\cleanProfitDevExact}{\productPrice - \ndsExact - \totalExpensesExact}
+\FPround{\cleanProfitDev}{\cleanProfitDevExact}{1}
+
+\FPeval{\cleanProfitExact}{\cleanProfitDevExact - \cleanProfitDevExact * \profitTax / 100}
+\FPround{\cleanProfit}{\cleanProfitExact}{1}
+
+\FPeval{\profitLevelExact}{\cleanProfitExact / \totalExpenses * 100}
+\FPround{\profitLevel}{\profitLevelExact}{1}
+
+\FPeval{\credit}{8.5}
+
+% End Calculations
+
+
+\subsection{Описание функций, назначения и потенциальных пользователей ПО}
+
+Система функционального контроля технических средств КМУ артиллерийского дивизиона предназначена для использования в
+армейских подразделениях. Данная система используется как часть комплекса автоматизации АРМ артиллерийского дивизиона.
+
+Разработанная система обладает следующими функциями:
+\begin{itemize}
+		\item настройка и тестирование метеокомплекта;
+		\item настройка и тестирование навигационной системы;
+		\item тестирование специального принтера;
+		\item настройка и тестирование радиоканалов;
+		\item автоматическая настройка устройств;
+		\item ведение журнала тестирования.
+\end{itemize}
+
+Данный продукт разрабатывается под заказ для вооруженных сил.
+
+\subsection{Расчет на разработку ПО}
+
+Расчет затрат на разработку ПО рассчитывается упрощенно, на основе следующих статей~\cite{economics_diploma}:
+\begin{itemize}
+	\item затраты на основную заработную плату разработчиков;
+	\item затраты на дополнительную заработную плату разработчиков;
+	\item отчисления на социальные нужды;
+	\item прочие отчисления (амортизационные отчисления, арендная плата за помещения и
+		оборудование, расходы на управление и реализацию, расходы на электроэнергию и тому подобное).
+\end{itemize}
+
+Произведем расчет данных статей.
+
+\subsubsection{Затраты на основную заработную плату разработчиков}
+
+Затраты на основную заработную плату команды разработчиков определяются исходя из численности и состава команды,
+размеров месячной заработной платы каждого из участника команды, а также общей трудоемкости разработки программного
+обеспечения.
+
+
+\begin{equation}
+  \label{eq:econ:main_salary}
+	\text{З}_\text{о} = \text{К}_\text{пр} \cdot \sum_{i = 1}^{n} \text{З}_\text{чi} \cdot t_{i} \text{\,,}
+\end{equation}
+
+\begin{explanation}
+	где & $ \text{K}_\text{пр} $ & коэффициент премий; \\
+	& $ \text{З}_\text{чi} $ & часовая заработанная плата i-го исполнителя, руб; \\
+	& $ t_{i} $ & трудоемкость работ, выполняемых i-м исполнителем, ч; \\
+	& $ n $ & количество исполнителей, занятых разработкой конкретного ПО.
+\end{explanation}
+
+Часовая заработная плата определяется путем деления месячной заработной платы на количество рабочих часов в месяце и
+рассчитывается по формуле~\ref{eq:econ:hour_salary}.
+
+\begin{equation}
+  \label{eq:econ:hour_salary}
+	\text{З}_\text{чi} = \frac{\text{З}_\text{мi}}{\text{Ф}_\text{рв}} \text{\,,}
+\end{equation}
+
+\begin{explanation}
+	где & $ \text{З}_\text{мi} $ & месячная заработная плата i-го участника команды, руб; \\
+	& $ \text{Ф}_\text{рв} $ & установленный фонд рабочего времени, \num{\normativeManHours} ч.
+\end{explanation}
+
+Средняя заработная плата по Республике Беларусь берется из открытого источника~\cite{salaries}.
+
+Расчет затрат на основную заработную плату команды разработчиков приведен в таблице~\ref{table:econ:salaryCalc}.
+
+\bigskip
+\begin{table}[!ht]
+\small
+\caption{Расчет затрат на основную заработную плату команды разработчиков}
+	\label{table:econ:salaryCalc}
+	\centering
+	\begin{tabular}{| >{\centering}m{0.14\textwidth}
+		| >{\centering}m{0.17\textwidth}
+		  | >{\centering}m{0.13\textwidth}
+		  | >{\centering}m{0.12\textwidth}
+		  | >{\centering}m{0.15\textwidth}
+		  | >{\centering\arraybackslash}m{0.13\textwidth}|}
+
+		\hline
+		Участники команды & Вид выполняемой работы & Месячная заработная плата, р. & Часовая заработная плата, р. &
+		Трудоемкость работ, ч. & Зарплата по тарифу, р. \\
+
+		\hline
+		Ведущий инженер-программист & Разработка архитектуры & \num{\leadDevPerMonth} & \num{\leadDevPerHour} &
+		\num{\leadDevHours} & \num{\leadDevSalary} \\
+
+		\hline
+		Инженер-программист & Реализация программного продукта & \num{\devPerMonth} & \num{\devPerHour} &
+		\num{\devHours} & \num{\devSalary} \\
+
+		\hline
+		Тестировщик & Тестирование программного продукта & \num{\qaPerMonth} & \num{\qaPerHour} & \num{\qaHours}
+		& \num{\qaSalary} \\
+
+		\hline
+		\multicolumn{5}{|l|}{Премия} & \num{\bonusRate} \\
+
+		\hline
+		\multicolumn{5}{|l|}{Итого затраты на основную заработную плату разработчиков} & \num{\totalSalary} \\
+		\hline
+	\end{tabular}
+\end{table}
+\vspace{-1em}
+
+\subsubsection{Затраты на дополнительную заработную плату разработчиков}
+
+Данные затраты включают в себя выплаты, предусмотренные законодательством о труде:
+\begin{itemize}
+	\item оплата льготных часов;
+	\item оплата времени выполнения государственных обязанностей;
+	\item оплаты трудовых отпусков;
+	\item выплаты, не связанные с основной деятельностью исполнителей.
+\end{itemize}
+
+Затраты на дополнительную заработную плату разработчиков определяются по следующей формуле
+
+\begin{equation}
+  \label{eq:econ:extra_salary}
+	\text{З}_\text{д} = \frac{\text{З}_\text{о} \cdot \text{Н}_\text{д}}{\num{100}} \text{\,,}
+\end{equation}
+
+\begin{explanation}
+	где & $ \text{З}_\text{о} $ & затраты на основную заработную плату, руб; \\
+	& $ \text{Н}_\text{д} $ & норматив дополнительной заработной платы, \num{\normExtraSalary} \%.
+\end{explanation}
+
+Зарплаты на дополнительную заработную плату:
+
+\begin{equation}
+  \label{eq:econ:extra_salary_calc}
+	\text{З}_\text{д} = \frac{\num{\totalSalary} \cdot \num{\normExtraSalary}}{\num{100}} = \num{\extraSalary} {\text{ \byr}} \text{.}
+\end{equation}
+
+\subsubsection{Отчисления на социальные нужды}
+
+Отчисления на социальные нужды идут в фонд социальной защиты населения и на обязательное страхование. Эти отчисления определяются в соответствии с действующими законодательными актами по формуле
+
+\begin{equation}
+  \label{eq:econ:social_fees}
+	\text{Р}_\text{соц} = \frac{(\text{З}_\text{о} + \text{З}_\text{д}) \cdot \text{Н}_\text{соц}} {\num{100}} \text{\,,}
+\end{equation}
+
+\begin{explanation}
+	где & $ \text{Н}_\text{соц} $ & норматив отчислений на социальные нужды, \num{\socialFeesCoeff} \%.
+\end{explanation}
+
+Отчисления на социальные нужды:
+
+\begin{equation}
+  \label{eq:econ:social_fees_calc}
+	\text{З}_\text{о} = \frac{(\num{\totalSalary} + \num{\extraSalary}) \cdot \num{\socialFeesCoeff}}{\num{100}} =
+	\num{\socialFees} {\text{ \byr}} \text{.}
+\end{equation}
+
+\subsection{Прочие отчисления}
+
+Прочие затраты включаются в себестоимость разработки ПО в процентах от затрат на основную заработную плату команды
+разработчиков.
+
+\begin{equation}
+  \label{eq:econ:extra_fees}
+	\text{З}_\text{пз} = \frac{\text{З}_\text{о} \cdot \text{Н}_\text{пз}} {\num{100}} \text{\,,}
+\end{equation}
+
+\begin{explanation}
+	где & $ \text{Н}_\text{пз} $ & норматив прочих затрат, \num{\extraFeesCoeff} \%.
+\end{explanation}
+
+Прочие затраты составляют:
+
+\begin{equation}
+  \label{eq:econ:extra_fees_calc}
+	\text{З}_\text{пз} = \frac{\num{\totalSalary} \cdot \num{\socialFeesCoeff}}{\num{100}} =
+	\num{\extraFees} {\text{ \byr}} \text{.}
+\end{equation}
+
+\subsection{Полная сумма затрат}
+Полная сумма затрат на разработку программного обеспечения находится путем суммирования всех рассчитанных статей затрат
+
+\bigskip
+\begin{table}[!ht]
+	\caption{Затраты на разработку программного обеспечения}
+	\label{table:econ:total_expenses}
+	\centering
+	\begin{tabular}{| >{\raggedright}m{0.82\textwidth}
+		  | >{\centering\arraybackslash}m{0.13\textwidth}|}
+
+		\hline
+		\centering{Статья затрат} & Сумма, р. \\
+
+		\hline
+		Основная заработная плата команды разработчиков & \num{\totalSalary} \\
+
+		\hline
+		Дополнительная заработная плата команды разработчиков & \num{\extraSalary} \\
+
+		\hline
+		Отчисления на социальные нужды & \num{\socialFees} \\
+
+		\hline
+		Прочие затраты & \num{\extraFees} \\
+
+		\hline
+		Общая сумма затрат на разработку & \num{\totalExpenses} \\
+
+		\hline
+	\end{tabular}
+\end{table}
+\vspace{-1em}
+
+\subsection{Оценка результата разработки и использования ПО}
+
+При разработке или использовании программного продукта можно получить экономический эффект, который напрямую влияет
+на экономические показатели компании, или неэкономический эффект, который напрямую не связан с экономическими
+показателями деятельности компании.
+
+\subsection{Экономический эффект}
+
+При разработке программного обеспечения под заказ экономический эффект может быть рассчитан как для
+организации-разработчика, так и для заказчика ПО. В нашем случае, экономический эффект получает только\break организация-разработчик.
+
+Экономическим эффектом для организации-разработчика является чистая прибыль,
+если организация является плательщиком налогов, либо прибыль до налогообложения, если организация освобождена от уплаты
+налогов на прибыль, полученная от реализации программного обеспечения.
+В нашем случае, компания является налогоплательщиком, следовательно, нужно рассчитать чистую прибыль.
+
+Чистая прибыль для организаций, которые являются плательщиком налога на прибыль, рассчитывается по формуле
+
+\begin{equation}
+  \label{eq:econ:clean_profit}
+	\text{П}_\text{ч} = \text{П} - \frac{\text{П} \cdot \text{Н}_\text{п}} {\num{100}} \text{\,,}
+\end{equation}
+
+\begin{explanation}
+	где & $ \text{П} $ & прибыль до налогообложения, руб; \\
+	& $ \text{Н}_\text{п} $ & ставка налога на прибыль, в соответствии с действующим законодательством,
+	\num{\profitTax}\%.
+\end{explanation}
+
+Прибыль до налогообложения организации-разработчика рассчитывается по формуле
+
+\begin{equation}
+  \label{eq:econ:clean_profit_dev}
+	\text{П} = \text{Ц} - \text{НДС} - \text{З}_\text{р} \text{\,,}
+\end{equation}
+
+\begin{explanation}
+	где & $ \text{Ц} $ & цена реализации программного продукта заказчику, руб; \\
+	& $ \text{НДС} $ & сумма налога на добавленную стоимость, руб; \\
+	& $ \text{З}_\text{р} $ & затраты на разработку программного обеспечения, руб.
+\end{explanation}
+
+Сумма налога на добавленную стоимость рассчитывается для организаций, являющимися плательщиками НДС,
+по следующей формуле
+
+\begin{equation}
+  \label{eq:econ:nds}
+  \text{НДС} =
+    \frac{ \text{Ц} \cdot \text{Н}_{\text{дс}} }
+	 { \num{100}\text{\%} + \text{Н}_\text{дс} } \text{\,,}
+\end{equation}
+
+\begin{explanation}
+	где & $ \text{Н}_{\text{дс}} $ & ставка налога на добавленную стоимость согласно действующему законодательству,
+	\num{\ndsNormative}\%.
+\end{explanation}
+
+Цена программного продукта устанавливается на основе цен на программное обеспечение, выполняющие схожие функции.
+Для данного продукта отсутствуют точные аналоги в открытом доступе, поэтому цена формировалась на основе нескольких
+продуктов, предлагающих похожий функционал. В результате была установлена цена в размере \num{\productPrice} руб.
+
+Сумма налога на добавленную стоимость составляет:
+
+\begin{equation}
+  \label{eq:econ:nds_calc}
+  \text{НДС} =
+	\frac{ \num{\productPrice} \cdot \num{\ndsNormative}}
+	 { \num{100} + \num{\ndsNormative}} = \num{\nds} \text{ \byr.}
+\end{equation}
+
+Прибыль до налогообложения составляет:
+\begin{equation}
+  \label{eq:econ:clean_profit_dev_calc}
+	\text{П} = \num{\productPrice} - \num{\nds} - \num{\totalExpenses}
+	 = \num{\cleanProfit} \text{ \byr.}
+\end{equation}
+
+Экономический эффект с учетом налога на прибыль, рассчитанный по формуле~\ref{eq:econ:clean_profit}:
+\begin{equation}
+  \label{eq:econ:clean_profit_calc}
+	\text{П}_\text{ч} = \num{\cleanProfitDev} - \frac{\num{\cleanProfitDev} \cdot \num{\profitTax}}{\num{100}}
+	 = \num{\cleanProfit} \text{ \byr.}
+\end{equation}
+
+Для того, чтобы сделать вывод об эффективности разработки и реализации программного продукта по установленной цене,
+необходимо рассчитать уровень рентабельности.
+Рассчитанный уровень рентабельности сравнивается со средней ставкой по банковским депозитам.
+
+Уровень рентабельности рассчитывается по формуле
+\begin{equation}
+  \label{eq:econ:profit_level}
+	\text{У}_\text{р} =
+	\frac{\text{П}_\text{ч}}
+	 {\text{З}_\text{р}} \cdot \num{100}{\text{\%}} \text{.}
+\end{equation}
+
+Уровень рентабельности составляет
+\begin{equation}
+  \label{eq:econ:profit_level_calc}
+	\text{У}_\text{р} = \frac{\num{\cleanProfit}}{\num{\totalExpenses}} \cdot \num{100}\text{\%}
+	 = \num{\profitLevel} \text{ \%.}
+\end{equation}
+
+Средняя ставка по банковским депозитам на апрель месяц для юридических лиц составляет \num{\credit}\%.
+Сравнивая уровень рентабельности и среднюю ставку по банковским депозитам можно сделать вывод,
+что проект экономически эффективен, т.к. уровень рентабельности больше, чем средняя ставка по банковским депозитам.
+
+\subsection{Неэкономический эффект}
+
+Для организации-заказчика данный продукт приводит к получению\break только неэкономического эффекта.
+При использовании данного программного продукта в составе комплекса автоматизации АРМ, с офицеров снимаются задачи по
+обнаружению и настройке подключенных устройств вручную, упрощается процесс тестирования и мониторинга подключенных
+\break
+устройств.
+
+\hfill
+\clearpage
+
+

@@ -1,0 +1,45 @@
+\input{preamble}
+
+\input{macro_glob}
+
+\begin{document}
+
+\input{review} % page 1
+
+\input{feedback} % page 1
+
+\input{diploma_title} % page 1
+
+\input{abstract} %
+
+\pagenumbering{gobble}
+
+\input{diploma_task} % pages 2 and 3. printed separately
+
+\input{abbreviations} %
+
+\input{table_of_contents}
+
+\pagenumbering{arabic}
+\setcounter{page}{8}
+
+\input{diploma_content}
+
+\input{references}
+
+\input{appendix_a}
+
+\input{appendix_b}
+
+\input{appendix_c}
+
+\input{appendix_d}
+
+\input{appendix_e}
+
+% \includepdf позволяет включить в результирующий pdf документ часть другого pdf документа, сделанного
+% например не с помощью TeX. Бывает полезно, если какие-то диаграммны нарисованы, например, с помощью
+% Microoft Office и сохранены в pdf.
+%\includepdf[pages={-}]{documents_list.pdf}
+
+\end{document}

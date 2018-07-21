@@ -1,0 +1,34 @@
+% Зачем: Содержание пишется нормальным шрифтом, по центру всеми заглавными буквами
+% Почему: Пункт 2.2.7 Требований по оформлению пояснительной записки.
+%\renewcommand \contentsname {\centerline{{\normalsize{\normalfont{СОДЕРЖАНИЕ}}}}}
+
+\renewcommand\contentsname{\hfill СОДЕРЖАНИЕ \hfill}
+\renewcommand\cfttoctitlefont{\normalfont\normalsize}% use "\bfseries" if you want it in bold
+\renewcommand{\cftaftertoctitle}{\hfil}
+%\setlength\cftbeforetoctitleskip{0.2cm}
+
+\def\formatsection{\MakeUppercase}
+
+\makeatletter
+\let\oldcontentsline\contentsline
+\def\contentsline#1#2{%
+  \expandafter\ifx\csname l@#1\endcsname\l@section
+    \expandafter\@firstoftwo
+  \else
+    \expandafter\@secondoftwo
+  \fi
+  {%
+	  \oldcontentsline{#1}{\MakeUppercase{#2}}%
+  }{%
+	\oldcontentsline{#1}{#2}%
+  }%
+}
+\makeatother
+
+%% Зачем: Не захламлять основной файл
+%% Примечание: \small\selectfont злостный хак, чтобы уменьшить размер шрифта в ToC
+{
+\normalfont
+\tableofcontents
+\newpage
+}
